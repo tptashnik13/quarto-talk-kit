@@ -1,0 +1,29 @@
+# Quarto build artifacts. Regenerate with the two render commands in HOW_TO.md.
+.quarto/
+_freeze/
+master/talk.html
+master/talk_files/
+master/talk-static_*.html
+master/_fitcheck.html
+master/_fitselftest.html
+
+# master/talk-usb.html IS tracked on purpose. It is the single-file preview, so
+# anyone can see what this kit builds without installing Quarto first.
+
+# Generated speaker notes.
+speaker_notes_*.md
+speaker_notes_*.docx
+speaker_notes_print_*.html
+speaker_notes_print_*.pdf
+
+# Python
+__pycache__/
+*.pyc
+
+# R
+.Rhistory
+.RData
+.Rproj.user/
+
+# macOS
+.DS_Store

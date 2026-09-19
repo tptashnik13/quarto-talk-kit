@@ -1,0 +1,9 @@
+group,wave,estimate,se
+Treatment,1,0.12,0.05
+Treatment,2,0.31,0.06
+Treatment,3,0.47,0.06
+Treatment,4,0.52,0.07
+Control,1,0.09,0.05
+Control,2,0.14,0.05
+Control,3,0.11,0.06
+Control,4,0.16,0.06

@@ -1,0 +1,66 @@
+<script>
+/*
+  SVG attribute case repair.
+
+  Quarto re-serializes the document through an HTML DOM parser when it splits
+  slides. That parser lowercases attribute names, which is correct for HTML and
+  destructive for SVG, where names are case sensitive. viewBox becomes viewbox
+  and stops scaling; markerWidth/refX become markerwidth/refx and arrowheads
+  vanish. It fails silently — no warning from Quarto, pandoc, or the browser.
+
+  Writing the SVG inside a ```{=html} raw block does NOT avoid it, because the
+  re-serialization happens after the raw block is passed through.
+
+  So repair it in the DOM, where setAttribute on an SVG element is case
+  sensitive and does the right thing. Runs once, before first paint.
+*/
+(function () {
+  var FIX = {
+    viewbox: 'viewBox',
+    markerwidth: 'markerWidth',
+    markerheight: 'markerHeight',
+    refx: 'refX',
+    refy: 'refY',
+    markerunits: 'markerUnits',
+    preserveaspectratio: 'preserveAspectRatio',
+    patternunits: 'patternUnits',
+    gradientunits: 'gradientUnits',
+    clippathunits: 'clipPathUnits',
+    textlength: 'textLength',
+    lengthadjust: 'lengthAdjust'
+  };
+
+  function repair(root) {
+    // Only touch YOUR OWN hand-written figures. Wrap each one in a div with
+    // class `hand-svg`. Plotly and ggiraph build their SVG through the DOM API
+    // and are already correct; rewriting their attributes could disturb them.
+    var scopes = root.querySelectorAll('.hand-svg svg');
+    for (var i = 0; i < scopes.length; i++) {
+      var all = scopes[i].querySelectorAll('*');
+      var nodes = [scopes[i]];
+      for (var k = 0; k < all.length; k++) nodes.push(all[k]);
+      for (var n = 0; n < nodes.length; n++) {
+        var el = nodes[n];
+        // Snapshot: we mutate attributes while reading them.
+        var names = [];
+        for (var a = 0; a < el.attributes.length; a++) names.push(el.attributes[a].name);
+        for (var m = 0; m < names.length; m++) {
+          var lower = names[m];
+          var proper = FIX[lower];
+          if (proper && lower !== proper) {
+            var v = el.getAttribute(lower);
+            el.removeAttribute(lower);
+            el.setAttribute(proper, v);
+          }
+        }
+      }
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () { repair(document); });
+  } else {
+    repair(document);
+  }
+})();
+</script>

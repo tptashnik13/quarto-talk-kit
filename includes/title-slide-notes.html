@@ -1,0 +1,47 @@
+<!--
+  SPEAKER NOTES FOR THE TITLE SLIDE.
+
+  WHY THIS FILE EXISTS, and it is a real Quarto limitation rather than an
+  oversight. Quarto generates the title slide itself from the YAML, so there is
+  nowhere in your .qmd to attach an `::: {.notes}` block to it.
+
+  Writing anything between the YAML and the first `##` does not work either.
+  Quarto emits whatever sits there as its own slide, and an HTML comment counts
+  as content, so you get a permanently blank slide 2. That defect survives every
+  layout audit, because an empty slide has nothing to overflow and nothing to
+  misalign. `tools/check_blank_slides.py` exists to catch exactly it.
+
+  So the notes are injected into `#title-slide` after the document loads.
+  reveal's notes plugin reads `aside.notes` off the current slide when the
+  speaker window opens and again on every slidechanged, so an aside that is in
+  the DOM before you press `s` is picked up normally.
+
+  Loaded via `include-after-body` in _quarto.yml. The usb profile inherits it.
+
+  ⚠️ If you add a `*.html` rule to .gitignore, re-include this file explicitly.
+  A blanket HTML ignore swallows every include in this directory silently.
+
+  EDIT THE TEXT BELOW, or delete this file and its line in _quarto.yml if your
+  title slide needs no notes.
+-->
+<script>
+(function () {
+  function addTitleNotes() {
+    var slide = document.getElementById('title-slide');
+    if (!slide || slide.querySelector('aside.notes')) return;
+    var aside = document.createElement('aside');
+    aside.className = 'notes';
+    aside.innerHTML = [
+      '<p><strong>Before you say anything:</strong> check the projector is mirrored, not extended.</p>',
+      '<p>Presenter view opens a second browser window. On an extended display the room</p>',
+      '<p>sees the wrong one, and you will not notice until someone tells you.</p>'
+    ].join('');
+    slide.appendChild(aside);
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', addTitleNotes);
+  } else {
+    addTitleNotes();
+  }
+})();
+</script>

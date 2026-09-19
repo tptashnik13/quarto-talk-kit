@@ -1,0 +1,107 @@
+project:
+  title: "Talk"
+
+format:
+  revealjs:
+    theme: [default, theme/talk.scss]
+
+    # --- Offline survival -----------------------------------------------------
+    # This default build is a FOLDER: talk.html PLUS talk_files/. It is fully
+    # offline — nothing is fetched at display time — but you must copy the WHOLE
+    # folder, not just the .html.
+    #
+    # embed-resources is deliberately NOT set here. It cannot coexist with the
+    # chalkboard plugin; Quarto hard-errors on the combination. The single-file
+    # build lives in the `usb` profile instead:
+    #
+    #     quarto render master/talk.qmd --profile usb
+    #
+    # Present from THIS build. Carry the usb build as the fallback.
+    embed-resources: false
+
+    # --- Q&A drill-down -------------------------------------------------------
+    # slide-number + hash lets you jump straight to an appendix slide by typing
+    # its number when someone challenges a result. menu gives a searchable list.
+    slide-number: true
+    hash: true
+    menu:
+      side: left
+      numbers: true
+
+    # Chalkboard: press 'c' to draw ON the current slide, 'b' for a blank board
+    # over it. Annotating a coefficient live answers a methods question better
+    # than talking. 'c' is almost always the one you want.
+    chalkboard:
+      buttons: true
+      boardmarker-width: 4
+
+    # --- Presenting -----------------------------------------------------------
+    # 's' opens presenter view with notes and a timer on your laptop only.
+    # ⚠️ Presenter view opens a SECOND WINDOW. Mirror your displays, do not
+    # extend, or the room may see the wrong one.
+    controls: true
+    progress: true
+    history: true
+    center: false
+    width: 1280
+    height: 720
+
+    # How much of the window the canvas may use. reveal's default is 0.1, a 10%
+    # inset on every side, which combined with the section's own horizontal
+    # padding pushes the start of every line to about 10.4% of the window width.
+    #
+    # 0.02 plus the trimmed padding in theme/talk.scss lands at about 6.3%, which
+    # matches where PowerPoint puts a title by default. It also makes the deck
+    # bigger, which matters from the back of a room.
+    margin: 0.02
+
+    # ⚠️⚠️ THIS IS A CORRECTNESS SETTING, NOT A TASTE ONE. DO NOT RAISE IT.
+    #
+    # reveal scales the deck with ONE CSS transform, and above a scale of 1
+    # Chrome stops painting most of every Plotly figure: the axis labels go
+    # first, then the chart is cropped, and the visible fraction is exactly
+    # 1/scale. Text and hand-written SVG are unaffected, which is why this can go
+    # unnoticed for a long time and then appear on the podium machine.
+    #
+    # The DOM is provably CORRECT at every size, so tools/check_fit.py cannot
+    # catch this and never will. It is a PAINT failure, not a layout one.
+    #
+    # reveal's default is 2.0. Capping at 1.0 means the deck never scales UP, so
+    # the bug cannot fire on any display, in any window, with any number of
+    # screens attached. Scaling DOWN is unaffected and still works, so this
+    # changes nothing on a laptop-sized window.
+    #
+    # The cost is white bars on a display larger than 1280x720: the deck fills
+    # about 89% of the width at 1440x900 and 67% at 1920x1080. That is the
+    # deliberate trade. A correct deck with bars beats a full-bleed deck whose
+    # charts have lost their axes.
+    #
+    # If your deck has no Plotly or other DOM-built SVG in it, you can raise this.
+    maxScale: 1.0
+
+    # 16:9 is right for modern rooms, but some older seminar projectors are 4:3
+    # and will letterbox. Check the room before you commit to the aspect ratio.
+
+    include-after-body:
+      # Repairs SVG attribute case that Quarto's slide-splitting DOM pass
+      # lowercases. Without it a hand-written figure loses scaling and
+      # arrowheads, silently. See that file for the full explanation.
+      - includes/svg-case-fix.html
+      # Attaches speaker notes to the Quarto-generated title slide, which has
+      # nowhere in the .qmd to hang an ::: {.notes} block. See that file for why
+      # the obvious placement produces a blank slide instead.
+      - includes/title-slide-notes.html
+      # Click-to-expand cards. Needs a mouse or keyboard, not a clicker.
+      - includes/card-expand.html
+      # One clicker press moves the light from the left column to the right.
+      - includes/spotlight-swap.html
+
+    fig-align: center
+    code-line-numbers: false
+    link-external-newwindow: true
+
+execute:
+  echo: false
+  warning: false
+  message: false
+  freeze: auto

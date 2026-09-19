@@ -1,0 +1,1857 @@
+/*-- scss:defaults --*/
+
+// ==============================================================================
+// PALETTE — CHANGE THESE FOUR VALUES AND THE WHOLE DECK RETHEMES
+// ==============================================================================
+// The defaults below are a deliberately neutral navy and amber. They are not any
+// institution's colours. Replace them with yours.
+//
+// Pick ONE colour to carry the deck and hold the second one back. A palette where
+// two colours are used equally has no emphasis left to spend. Here navy does the
+// structural work — rules, headings, the favorable direction in a chart — and
+// amber is rare, so the eye goes to it because it is rare.
+//
+// TO RETHEME, change the four values below AND the matching list in
+// figures/R/palette.R. Plotly cannot read CSS variables, which is why there are
+// two files rather than one. Changing only the SCSS gives you a retheme with
+// every chart still in the old colours, and it is easy to miss on a laptop.
+
+$primary-blue: #1F4E79;        // Primary. Accents, rules, favorable results.
+$primary-gold: #E0A106;        // Secondary. Emphasis, unfavorable results.
+$highlight-yellow: #E0A106;
+$light-bg: #FFFFFF;            // Page ground. WHITE, deliberately.
+                               // A tinted ground under white cards under a tinted
+                               // callout puts three near-whites on top of each
+                               // other and nothing reads as foreground.
+
+$ink: #1A1A1A;                 // Near-black, for title text.
+$teal-deep: #10243A;           // Dark ground for section dividers and headings.
+$tint: #EAF0F6;                // Pale callout ground.
+$rule: #DCE3E5;
+
+// Custom properties so the hand-drawn SVGs in _model-figure.qmd and
+// _lens-figure.qmd pick the palette up too. Without these every fill and stroke
+// in those files would be a hardcoded hex to hunt down at retheme time.
+:root {
+  --c-primary:   #{$primary-blue};
+  --c-deep:      #{$teal-deep};
+  --c-gold:      #{$primary-gold};
+  --c-gold-dark: #B87F05;
+  --c-gold-text: #6B4A02;
+  --c-tint:      #{$tint};
+  --c-ink:       #{$ink};
+  --c-rule:      #{$rule};
+  --c-muted:     var(--c-muted);
+  --c-arrow:     #7E8B8E;
+}
+
+// Semantic color mapping (don't change these names)
+$jet: #262626;
+$accent: $primary-blue;
+$accent2: $primary-gold;
+$right-arrow: "\2192";
+
+// Fonts. The upstream theme pulled Source Sans Pro from Google Fonts over the
+// network. That is removed on purpose: embed-resources cannot inline a webfont
+// fetched at runtime, so a no-wifi podium would stall on the request and then
+// fall back anyway. These are all macOS system faces, so the deck renders
+// identically with the network unplugged.
+$font-family-sans-serif: "Helvetica Neue", "Avenir Next", Helvetica, Arial, sans-serif !default;
+$presentation-heading-font: "Helvetica Neue", "Avenir Next", Helvetica, Arial, sans-serif !default;
+
+$presentation-heading-color: $primary-blue !default;
+$presentation-heading-font-weight: 600;
+$presentation-font-size-root: 33px;
+
+// Spacing
+$presentation-block-margin: 12px;
+$presentation-h2-font-size: 1.4em;
+
+// Colors
+$body-color: $jet !default;
+$link-color: $primary-blue !default;
+$selection-bg: $primary-gold !default;
+
+
+/*-- scss:rules --*/
+
+// ==============================================================================
+// SLIDE LAYOUT
+// ==============================================================================
+
+.reveal .slides {
+  text-align: left;
+}
+
+.reveal .slides section {
+  // 0.7em is 23px on the 1280 canvas. With the 0.02 reveal margin in
+  // _quarto.yml this starts every line at about 6.3% of the window width,
+  // matching the 6.1% of the reference PowerPoint deck. Was 1em, which read as indented.
+  padding: 0.5em 0.7em;
+  top: 0 !important;
+  // BORDER-BOX IS LOAD-BEARING. reveal sets `.slides > section { width: 100% }`
+  // against a fixed 1280px canvas, and the browser default is content-box, so
+  // the 1em of horizontal padding above was being ADDED to 1280 rather than
+  // taken out of it. Every slide rendered 1346px wide inside a 1280px canvas
+  // and lost 66px off the right edge.
+  //
+  // Reported 2026-09-02 as "many of them get cut off on the right side."
+  // Present since the theme was written. Every audit up to that point measured
+  // vertical overflow only, which is why it survived.
+  box-sizing: border-box;
+}
+
+.reveal a {
+  line-height: 1.3em;
+  text-decoration: none;
+  border-bottom: 1px dotted $primary-gold;
+  transition: border-color 0.2s ease;
+
+  &:hover {
+    border-bottom-color: $primary-blue;
+  }
+}
+
+.reveal p {
+  font-weight: 300;
+  margin-top: 0.5em;
+  margin-bottom: 0.35em;
+  line-height: 1.45;
+}
+
+.reveal p + ul,
+.reveal p + ol {
+  margin-top: 0.3em;
+}
+
+// ==============================================================================
+// TITLE SLIDE
+// ==============================================================================
+
+#title-slide {
+  text-align: center !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+  height: 100% !important;
+  background: #FFFFFF;
+
+  // RESERVES THE BOTTOM BAND FOR THE MARK, and it is load-bearing.
+  // The mark is an absolutely-positioned `::after`, so it takes no part in this
+  // flex column and NO LAYOUT CHECK CAN SEE IT. When it moved to the centre and
+  // grew on 2026-09-10 it landed directly on top of the fifth author's
+  // affiliation, and the both-axes sweep reported the slide clean, because a
+  // pseudo-element is not in `querySelectorAll('*')` and overlap is not overflow.
+  // It was caught by looking at a screenshot.
+  //
+  // Padding is what keeps the centred column clear of it. If the mark's height or
+  // `bottom` below ever change, change this with them.
+  //
+  // ⚠️ SET THIS WHEN YOU UNCOMMENT THE MARK, and set it from the mark's own
+  // geometry. At 300x125 sitting at `bottom: 34px`, the mark's top edge is at
+  // 561px on the 720px canvas, and 182px of padding leaves the centred column
+  // ending at 538 with a 23px gap. It is 0 here because no mark ships.
+  padding-bottom: 0 !important;
+
+  // ORDER, not DOM order. Quarto emits title, subtitle, authors, date, and
+  // the speaker asked on 2026-09-10 for the date to sit between the heading block and
+  // the author list. #title-slide is already a flex column, so `order` moves it
+  // without touching Quarto's generated markup, which is not ours to edit and
+  // would be regenerated on the next render anyway.
+  .title    { order: 1; }
+  .subtitle { order: 2; }
+  .date, .quarto-title-meta-contents { order: 3; }
+  .quarto-title-authors { order: 4; }
+
+  // 2.6em since 2026-09-12. It was 1.95em when the title was the PAPER title, a
+  // long line competing with five author rows. The slide is now generic — "Job
+  // Talk" over one name — so the heading is two words with nothing to compete
+  // with, and at 1.95em it read as a caption rather than a title.
+  .title {
+    color: $primary-blue;
+    font-size: 2.6em;
+    font-weight: 700;
+    margin-bottom: 0.2em;
+    letter-spacing: -0.02em;
+  }
+
+  // The subtitle is the only line here that WRAPS, which makes its line-height
+  // the most expensive number on the slide. At reveal's default the two lines
+  // cost 117px and left the title 1.6px from the top edge of the canvas.
+  .subtitle {
+    color: $primary-gold;
+    font-style: italic;
+    margin-top: 0.3em;
+    margin-bottom: 0.5em;
+    font-weight: 400;
+    font-size: 1.22em;
+    line-height: 1.22;
+  }
+
+  .author,
+  .quarto-title-author-name {
+    color: $primary-blue;
+    font-weight: 600;
+    font-size: 1.2em;
+    margin-top: 0.5em;
+  }
+
+  .institute,
+  .quarto-title-affiliation,
+  .quarto-title-author-email {
+    font-style: italic;
+    color: #555;
+    margin-top: 0.4em;
+    font-size: 1.05em;
+  }
+
+  // Moved between the heading block and the author list on 2026-09-10, and set
+  // small. It is a fact the room needs available, not a thing to read, so it
+  // works as a rule between the two blocks rather than as a line of its own.
+  // The 1.5em top margin it used to carry was pushing the authors down when the
+  // date sat below them; here it separates two blocks that are already close.
+  // Black rather than gold since 2026-09-10, by choice. It also means
+  // the slide spends its gold on the subtitle alone, which is the line that
+  // should be catching the eye.
+  .date,
+  .quarto-title-meta-contents {
+    color: $ink;
+    font-weight: 600;
+    margin-top: 0;
+    margin-bottom: 0.4em;
+    font-size: 0.62em;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  // --- The author team -------------------------------------------------------
+  // Rebuilt 2026-09-08 for FIVE authors with affiliations. The single-author
+  // sizes above (1.2em name, 1.05em affiliation, 0.5em top margin) stack to well
+  // over the canvas once there are five of them, so the block gets its own
+  // compact scale rather than inheriting theirs.
+  //
+  // Each author is one centred line, name then affiliation, so the team reads as
+  // a list rather than as five stacked headings.
+  // The block is CENTRED on the slide but the lines are LEFT-ALIGNED WITH EACH
+  // OTHER, changed 2026-09-08. Centring each line individually gave a ragged
+  // stack of five, because the names differ in length. `width: fit-content` makes
+  // the container exactly as wide as its widest row, `margin-inline: auto`
+  // centres that container, and the rows then start at a shared left edge.
+  //
+  // Do not put `text-align: center` back on the rows. #title-slide sets
+  // `text-align: center !important` on itself, which the rows inherit, so they
+  // each need an explicit `text-align: left` to escape it.
+  .quarto-title-authors {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: fit-content;
+    margin-inline: auto;
+    gap: 0.24em;
+    margin-top: 0.7em;
+
+    .quarto-title-author {
+      padding: 0;
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-start;
+      align-items: baseline;
+      gap: 0.45em;
+      flex-wrap: nowrap;
+      text-align: left;
+    }
+
+    .quarto-title-author-name {
+      color: #333;
+      font-weight: 600;
+      font-size: 0.86em;
+      margin-top: 0;
+      white-space: nowrap;
+    }
+
+    .quarto-title-affiliation {
+      color: #666;
+      font-style: italic;
+      font-size: 0.82em;
+      margin-top: 0;
+      white-space: nowrap;
+
+      // The separator between a name and its affiliation. A middot rather than a
+      // comma, because the affiliations already contain commas in principle and
+      // this reads cleanly at the back of a room.
+      &::before { content: "\00b7"; margin-right: 0.45em; color: #aaa; }
+    }
+
+    // THE PRESENTING AUTHOR, when the slide carries the paper's five-author team.
+    // the presenting author is THIRD in the paper's author order, so without an accent the room
+    // cannot tell which of the five is the candidate standing in front of them.
+    // This is positional and it is the one thing here that breaks if the author
+    // order in the YAML changes. If you restore the team, change this number to
+    // match and re-render.
+    //
+    // ⚠️ IT DOES NOT MATCH TODAY. The title slide went generic on 2026-09-12 and
+    // carries one name; the author team moved to the #paper divider. The rule is
+    // kept because the five-author scale above is kept, and both come back
+    // together or not at all.
+    .quarto-title-author:nth-child(3) {
+      .quarto-title-author-name { color: $primary-blue; font-weight: 700; }
+      .quarto-title-affiliation { color: #444; }
+    }
+
+    // ONE AUTHOR. The compact scale above exists so five rows fit; it is far too
+    // small for a single name sitting alone under a two-word title. `:only-child`
+    // is a STATIC selector on a generated element, so it is not the runtime-class
+    // `:has()` trap recorded in CLAUDE.md — nothing here changes as the deck runs.
+    // Restore the author list in the YAML and this rule stops matching by itself.
+    .quarto-title-author:only-child {
+      .quarto-title-author-name { color: $primary-blue; font-weight: 700; font-size: 1.3em; }
+      .quarto-title-affiliation { color: #555; font-size: 1.04em; }
+    }
+  }
+
+  // --- YOUR INSTITUTION'S MARK, bottom-centre of the TITLE SLIDE ONLY --------
+  //
+  // Commented out because this kit ships with no logo. Uncomment, paste your own
+  // base64 SVG, and set the width and height to your mark's own aspect ratio.
+  //
+  // USE A VECTOR, NOT A PNG. A raster mark is crisp only at or below its native
+  // size. Render a 230x93 PNG at 300px wide and it is a 1.3x upscale, which a
+  // 1080p projector then scales again. A vector has no native size.
+  //
+  // EMBED IT AS A DATA URI, and that is not fussiness. If the deck has to work
+  // with no network, a `url("../logo.svg")` depends on Quarto resolving and
+  // inlining a CSS reference at build time, and if that ever fails it fails
+  // SILENTLY, leaving an empty band on a podium machine with no wifi. Inlining
+  // the bytes makes both builds carry the mark by construction. Encode with:
+  //   python3 -c "import base64;print(base64.b64encode(open('logo.svg','rb').read()).decode())"
+  //
+  // Positioned absolutely so it takes no part in the centred flex column above.
+  // reveal already positions the section, so no `position: relative` is needed on
+  // #title-slide and adding one risks disturbing reveal's own transforms.
+  //
+  // ⚠️ AN ABSOLUTELY-POSITIONED `::after` IS INVISIBLE TO EVERY LAYOUT CHECK.
+  // A pseudo-element is not in `querySelectorAll('*')` and overlap is not
+  // overflow, so tools/check_fit.py will report this slide clean while the mark
+  // sits directly on top of an author's affiliation. The only check that catches
+  // it is looking at a screenshot. Do that after any change to `width`,
+  // `height`, `bottom`, or the padding above.
+  //
+  // `bottom: 34px` clears reveal's progress bar along the very bottom edge. A
+  // centred mark clears the slide-number badge and the chalkboard and menu icons
+  // by construction.
+  //
+  // &::after {
+  //   content: "";
+  //   position: absolute;
+  //   left: 50%;
+  //   transform: translateX(-50%);
+  //   bottom: 34px;
+  //   width: 300px;
+  //   height: 125px;
+  //   background-image: url("data:image/svg+xml;base64,PASTE_YOUR_BASE64_HERE");
+  //   background-repeat: no-repeat;
+  //   background-position: bottom center;
+  //   background-size: contain;
+  //   opacity: 0.92;
+  //   pointer-events: none;
+  // }
+}
+
+// ==============================================================================
+// HEADINGS
+// ==============================================================================
+
+.reveal h2 {
+  color: $primary-blue;
+  font-weight: 600;
+  font-size: 1.5em;
+  margin-bottom: 0.7em;
+  padding-bottom: 0.2em;
+  border-bottom: 2px solid rgba($primary-gold, 0.3);
+}
+
+.reveal h3 {
+  color: $primary-gold;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 1em;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+}
+
+.reveal h4 {
+  color: $highlight-yellow;
+  font-weight: 600;
+  font-size: 0.95em;
+  margin-top: 0.8em;
+  margin-bottom: 0.3em;
+}
+
+// ==============================================================================
+// COLOR UTILITY CLASSES
+// ==============================================================================
+
+.alert { color: $primary-gold; }
+
+// Customize these class names for your institution:
+.emoryblue { color: $primary-blue; }
+.emorygold { color: $primary-gold; }
+.emoryyellow { color: $highlight-yellow; }
+
+// Semantic colors for diagrams and annotations
+.positive {
+  color: #15803d !important;  // Green - good/observed/identified
+  font-weight: 600;
+}
+
+.negative {
+  color: #b91c1c !important;  // Red - bad/problematic/bias
+  font-weight: 600;
+}
+
+.neutral {
+  color: #525252 !important;  // Gray - reference/context
+}
+
+// Highlight classes
+.hi { font-weight: 600; color: $primary-blue !important; }
+.hi-gold { font-weight: 600; color: $primary-gold !important; }
+.hi-yellow { font-weight: 600; color: $highlight-yellow !important; }
+.hi-slate { font-weight: 600; color: #314f4f !important; }
+.hi-green { font-weight: 600; color: #2E8B57 !important; }
+.hi-red { font-weight: 600; color: #C41E3A !important; }
+
+.fg { color: var(--col, $jet); }
+.bg {
+  background-color: var(--col, #fff);
+  padding: 0.1em;
+  border-radius: 5px;
+  display: inline-block;
+}
+
+// ==============================================================================
+// LISTS
+// ==============================================================================
+
+.reveal ul {
+  font-weight: 300;
+  padding-left: 1.5em;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+
+  li {
+    margin-bottom: 0.35em;
+    line-height: 1.4;
+    padding-left: 0.3em;
+  }
+
+  li::marker {
+    color: $primary-blue;
+    font-size: 0.9em;
+  }
+}
+
+.reveal ul ul {
+  list-style: none;
+  margin-top: 0.3em;
+  margin-bottom: 0.3em;
+  padding-left: 1.2em;
+
+  li {
+    margin-bottom: 0.25em;
+    position: relative;
+    padding-left: 0.2em;
+  }
+
+  li:before {
+    content: $right-arrow;
+    color: $primary-gold;
+    position: absolute;
+    left: -1.1em;
+    font-size: 0.9em;
+  }
+}
+
+.reveal ol {
+  font-weight: 300;
+  padding-left: 1.5em;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+
+  li {
+    margin-bottom: 0.35em;
+    line-height: 1.4;
+    padding-left: 0.3em;
+  }
+
+  li::marker {
+    color: $highlight-yellow;
+    font-weight: 700;
+  }
+}
+
+// ==============================================================================
+// BOX ENVIRONMENTS
+// ==============================================================================
+
+.keybox {
+  background-color: rgba($primary-gold, 0.12);
+  border-left: 4px solid $primary-gold;
+  padding: 0.8em 1.2em;
+  margin: 1.2em 0;
+  border-radius: 6px;
+  line-height: 1.6;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.highlightbox {
+  background-color: rgba($highlight-yellow, 0.08);
+  border-left: 4px solid $highlight-yellow;
+  padding: 0.8em 1.2em;
+  margin: 1.2em 0;
+  border-radius: 6px;
+  line-height: 1.6;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.methodbox {
+  background-color: rgba($primary-blue, 0.06);
+  border-left: 4px solid $primary-blue;
+  padding: 0.8em 1.2em;
+  margin: 1.2em 0;
+  border-radius: 6px;
+  line-height: 1.6;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.assumptionbox {
+  background-color: rgba($primary-gold, 0.08);
+  border: 2px solid $primary-gold;
+  padding: 0.8em 1.2em;
+  margin: 1.2em 0;
+  border-radius: 6px;
+  line-height: 1.6;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.quotebox {
+  background-color: rgba($primary-gold, 0.08);
+  border-left: 4px solid darken($primary-gold, 10%);
+  padding: 0.8em 1.2em 0.8em 1.8em;
+  margin: 1em 0;
+  border-radius: 0 6px 6px 0;
+  font-style: italic;
+  line-height: 1.5;
+  position: relative;
+
+  &::before {
+    content: "\201C";
+    font-size: 2.5em;
+    color: rgba($primary-gold, 0.4);
+    position: absolute;
+    left: 0.15em;
+    top: -0.1em;
+    font-style: normal;
+    line-height: 1;
+  }
+}
+
+.resultbox {
+  background-color: rgba($primary-gold, 0.15);
+  border: 2px solid $primary-gold;
+  padding: 0.8em 1.2em;
+  margin: 1.2em 0;
+  border-radius: 6px;
+  line-height: 1.6;
+  box-shadow: 1px -1px 4px rgba(0, 0, 0, 0.12);
+}
+
+.eqbox {
+  background-color: rgba($primary-blue, 0.04);
+  padding: 0.6em 1.2em;
+  margin: 0.8em 0;
+  border-radius: 0;
+  line-height: 1.6;
+}
+
+.softbox {
+  background-color: rgba($primary-gold, 0.06);
+  padding: 0.6em 1.2em;
+  margin: 0.8em 0;
+  border-radius: 0;
+  line-height: 1.6;
+  font-style: italic;
+}
+
+// ==============================================================================
+// TABLES
+// ==============================================================================
+
+.reveal table {
+  margin: auto;
+  border-collapse: collapse;
+  border-spacing: 0;
+  font-size: 0.8em;
+}
+
+.reveal table th,
+.reveal table td {
+  border: none;
+  padding: .23em;
+  text-align: left;
+  font-weight: 300;
+}
+
+.reveal table thead th,
+.reveal .slides table tr:last-child td,
+.reveal .slides table {
+  border-bottom: 2px solid $primary-blue;
+}
+
+.reveal table thead th {
+  font-weight: 600;
+  color: $primary-blue;
+}
+
+.reveal table caption {
+  color: #666666;
+  font-variant: small-caps;
+}
+
+// ==============================================================================
+// SECTION SLIDES
+// ==============================================================================
+
+.reveal .slide-background-content {
+  background-color: white;
+}
+
+.reveal section h1 {
+  color: $primary-blue;
+  text-align: center;
+  font-size: 2.2em;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  border-bottom: none;
+}
+
+.reveal .slides section.level1 {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+  height: 100% !important;
+  text-align: center !important;
+  top: 0 !important;
+  padding: 0 !important;
+  background: linear-gradient(135deg, white 0%, $light-bg 100%);
+}
+
+.reveal .slides section:has(> h1:only-child),
+.reveal .slides section:has(> h1:first-child:last-of-type) {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+  height: 100% !important;
+  text-align: center !important;
+  background: linear-gradient(135deg, white 0%, $light-bg 100%);
+}
+
+// ==============================================================================
+// FONT SIZE UTILITIES
+// ==============================================================================
+
+.bigger { font-size: 115%; }
+
+.smaller {
+  font-size: 85%;
+
+  p {
+    margin-top: 0.35em;
+    margin-bottom: 0.3em;
+    line-height: 1.35;
+  }
+
+  ul, ol {
+    margin-top: 0.35em;
+    margin-bottom: 0.35em;
+
+    li {
+      margin-bottom: 0.25em;
+      line-height: 1.35;
+    }
+  }
+
+  .highlightbox, .methodbox, .keybox, .assumptionbox {
+    padding: 0.5em 0.9em;
+    margin: 0.6em 0;
+    line-height: 1.35;
+  }
+}
+
+.smallest {
+  font-size: 80%;
+
+  p {
+    margin-top: 0.3em;
+    margin-bottom: 0.3em;
+  }
+}
+
+// ==============================================================================
+// LAYOUT UTILITIES
+// ==============================================================================
+
+.wide-table {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+
+  table {
+    width: 90%;
+    margin: 0 auto;
+
+    th, td {
+      padding: 0.5em 1em;
+    }
+  }
+}
+
+.compact {
+  p { margin-top: 0.4em; margin-bottom: 0.4em; }
+  ul, ol {
+    margin-top: 0.3em; margin-bottom: 0.5em;
+    li { margin-bottom: 0.25em; line-height: 1.4; }
+  }
+}
+
+.reveal .spaced-list ul li,
+.reveal .spaced-list ol li {
+  margin-bottom: 1.5em !important;
+}
+
+.mono { font-family: monospace; }
+.ul { text-decoration: underline; }
+.clear { clear: both; }
+
+.col-left { float: left; width: 47%; margin-top: 0; }
+.col-right { float: right; width: 47%; margin-top: 0; }
+.col-left-wide { float: left; width: 63%; }
+.col-right-narrow { float: right; width: 33%; }
+
+.footnote {
+  position: absolute;
+  bottom: 1em;
+  font-size: 70%;
+  color: #7f7f7f;
+}
+
+.note { font-style: italic; color: #666666; }
+.qa { font-weight: 600; color: $primary-blue; }
+
+// ==============================================================================
+// IMAGES AND FIGURES
+// ==============================================================================
+
+.reveal figure { margin: 0.8em 0; }
+.reveal img { max-height: 500px; }   // canvas px, not vh. Same reason.
+.reveal p:has(> img) { text-align: center; }
+.reveal figcaption {
+  font-size: 0.75em;
+  color: #666;
+  font-style: italic;
+  margin-top: 0.5em;
+  text-align: center;
+}
+
+// ==============================================================================
+// MATH
+// ==============================================================================
+
+.reveal .math { font-size: 0.95em; }
+.reveal .math.display { margin: 0.8em 0; }
+
+// ==============================================================================
+// COLUMNS
+// ==============================================================================
+
+.reveal .columns {
+  display: flex !important;
+  align-items: flex-start;
+  gap: 2em;
+}
+
+.reveal .column {
+  flex: 1;
+  img { max-width: 100%; height: auto; }
+}
+
+// ==============================================================================
+// BLOCKQUOTES AND CODE
+// ==============================================================================
+
+.reveal blockquote {
+  background-color: rgba($primary-blue, 0.04);
+  border-left: 4px solid $primary-gold;
+  padding: 1em 1.5em;
+  margin: 1em 0;
+  border-radius: 0 6px 6px 0;
+  font-style: italic;
+  color: #444;
+
+  p { margin: 0.3em 0; }
+}
+
+.reveal code {
+  background-color: rgba($primary-blue, 0.06);
+  padding: 0.15em 0.4em;
+  border-radius: 3px;
+  font-size: 0.85em;
+}
+
+.reveal pre {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  padding: 1em;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+// ==============================================================================
+// REFERENCES
+// ==============================================================================
+
+#refs {
+  font-size: 0.5em;
+  line-height: 1.4;
+  column-count: 1;
+
+  div { margin-bottom: 0.5em; break-inside: avoid; }
+  p { margin: 0.2em 0; }
+}
+
+.references { font-size: 0.5em; line-height: 1.4; }
+
+// ==============================================================================
+// NAVIGATION
+// ==============================================================================
+
+.slide-logo {
+  display: block !important;
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 10px !important;
+  max-width: 150px;
+  max-height: 50px;
+  width: auto !important;
+  color: $body-color !important;
+}
+
+.slide-number, .reveal.has-logo .slide-number {
+  bottom: 6px !important;
+  right: 10px !important;
+  top: unset !important;
+  color: #777777 !important;
+}
+
+// ==============================================================================
+// ACCESSIBILITY
+// ==============================================================================
+
+.reveal a:focus,
+.reveal button:focus {
+  outline: 2px solid $primary-gold;
+  outline-offset: 2px;
+}
+
+
+// ==============================================================================
+// AOM COMPONENTS
+// ==============================================================================
+// The visual grammar of a reference PowerPoint deck, rebuilt as CSS. That deck's slides are
+// not bulleted lists — they are two or three white rounded cards on a light
+// ground, each with a small heading and a short body, plus an accent rule.
+// Bullets are the exception there, not the default. These classes make that the
+// easy thing to write in Markdown.
+//
+// Usage:  ::: {.cards}  then  ::: {.card}  ...  :::  :::
+
+.reveal .slides section {
+  text-align: left;
+}
+
+// --- Card grid ---------------------------------------------------------------
+.reveal .cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0.8em;
+  margin-top: 0.55em;
+  align-items: stretch;
+  // Fill the slide. The complaint that drove this: cards floating in a sea of
+  // white at the top of an otherwise empty slide. Content should occupy the
+  // slide, so the grid claims the vertical space the header leaves behind.
+  //
+  // 58vh rather than 66vh: at 66 a card row plus any callout beneath it always
+  // overflowed, which is what .tint.under-cards was invented to paper over.
+  min-height: 458px;   // canvas px, never vh. Was 66vh, which broke
+                       // on tall windows by overflowing the 720px canvas.
+}
+.reveal .cards.two   { grid-template-columns: repeat(2, 1fr); }
+.reveal .cards.three { grid-template-columns: repeat(3, 1fr); }
+
+.reveal .card {
+  background: #FFFFFF;
+  border-radius: 10px;
+  padding: 1.05em 1.15em;
+  // On a white ground a drop shadow is the only thing separating card from
+  // page, and a heavy one reads as a web component rather than as a slide.
+  // A hairline border plus a thick accent edge does the same job quietly.
+  border: 1px solid $rule;
+  box-shadow: none;
+  border-top: 5px solid $primary-blue;
+  font-size: 0.92em;
+  line-height: 1.45;
+  display: flex;
+  flex-direction: column;
+}
+.reveal .card.amber { border-top-color: $primary-gold; }
+.reveal .card.plain { border-top-color: $rule; }
+
+// First line of a card acts as its heading without needing a heading level,
+// which keeps the markdown clean and keeps headings out of the slide outline.
+.reveal .card > p:first-child > strong:only-child,
+.reveal .card > h3:first-child {
+  display: block;
+  font-size: 1.05em;
+  font-weight: 600;
+  color: $teal-deep;
+  margin: 0 0 .35em 0;
+  letter-spacing: -0.01em;
+}
+.reveal .card p { margin: 0 0 .45em 0; }
+.reveal .card ul { margin: .2em 0 .3em 1em; }
+.reveal .card li { margin: .12em 0; }
+
+// --- Tinted callout ----------------------------------------------------------
+.reveal .tint {
+  background: $tint;
+  border-radius: 14px;
+  padding: 1em 1.15em;
+  font-size: 0.92em;
+  line-height: 1.45;
+}
+
+// A tint that sits UNDER a .cards row. The card rows are a fixed 498px, so a
+// heading plus two cards already spends 608 of the 720 available. A default
+// .tint renders at 125px even on one line, which overflows every time. This
+// trims it to fit the 112px that is actually left.
+//
+// Measured, not guessed: h2 70 + margins 40 + cards 498 = 608.
+.reveal .tint.under-cards {
+  padding: 0.55em 1.15em;
+  font-size: 0.84em;
+  line-height: 1.34;
+  margin-top: 0.35em;
+}
+
+// ==============================================================================
+// .closing: THE CLOSING PHOTO SLIDE
+// ==============================================================================
+// Rebuilt 2026-09-10 by choice. A campus photograph carries the slide and the
+// two lines sit on top of it.
+//
+// It borrows the DIVIDER construction rather than inventing one: the h2 is a
+// `&nbsp;` placeholder that exists only to hang the id and the background
+// attribute on, and it is hidden. A visible h2 here would put the deck's blue
+// title band and its gold hairline on top of a photograph, which is the one
+// place in this deck where that band does not belong.
+//
+// THE SCRIM IS NOT DECORATION. White type on an unmodified photograph is
+// unreadable from the back of a room the moment the sun moves, and nobody gets
+// to re-shoot the photo at the podium.
+//
+// IT FALLS OFF HARD RATHER THAN EVENLY, and that is the whole trick. A flat tint
+// dark enough to carry white type also flattens the photograph into a green
+// wash, which is what the first version did. Heaviest under the type on the
+// left, nearly clear on the right, so the dragon and the building stay a
+// photograph instead of a texture.
+.reveal section.photo-slide { padding-top: 0; }
+.reveal section.photo-slide > h2 { display: none; }
+
+.reveal .thanks {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 620px;   // canvas px, never vh
+  color: #FFFFFF;
+}
+
+// The scrim is drawn by the block itself and pushed out to the full canvas with
+// negative insets, because reveal's own `.slide-background` sits BEHIND the
+// section and cannot be tinted from here without touching every other slide
+// that uses a background colour.
+.reveal .thanks::before {
+  content: "";
+  position: absolute;
+  top: -140px; bottom: -140px; left: -120px; right: -120px;
+  background: linear-gradient(100deg,
+              rgba(16,36,58,.93) 0%,
+              rgba(16,36,58,.87) 26%,
+              rgba(16,36,58,.55) 52%,
+              rgba(16,36,58,.20) 100%);
+  z-index: 0;
+}
+.reveal .thanks > * { position: relative; z-index: 1; }
+
+// Sized off .divider .big and .divider .lede so the close matches the six
+// dividers the room has already seen five of.
+.reveal .thanks-big {
+  font-size: 2.5em;
+  font-weight: 300;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+  margin-bottom: .3em;
+}
+.reveal .thanks-lede {
+  font-size: 0.95em;
+  opacity: .92;
+  max-width: 20em;
+  line-height: 1.4;
+  border-top: 3px solid rgba(255,255,255,.35);
+  padding-top: .5em;
+}
+
+// --- Big statistic -----------------------------------------------------------
+.reveal .stat {
+  font-size: 3.4em;
+  font-weight: 700;
+  color: $teal-deep;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.reveal .stat-label {
+  font-size: 0.72em;
+  color: lighten($ink, 25%);
+  margin-top: .15em;
+}
+
+// a hook slide's three labels are DOUBLE the shared size, 2026-09-12 by choice.
+// They carry the whole meaning of the row: "35%" and "33M" are not statements until
+// the label says of what, and at .72em the room read the numbers and skipped them.
+//
+// SCOPED TO a hook slide ON PURPOSE. `.stat-label` is also #apx-mgt320's, where the labels
+// are longer ("HR instructor on campus") and the slide carries a tint underneath, so
+// doubling there would break a slide nobody asked to change.
+a hook slide .stat-label { font-size: 1.44em; }
+
+// ⚠️ AND THE PARAGRAPH MARGINS HAD TO GO WITH IT. `.reveal p` sets .5em top and .35em
+// bottom, and both are RELATIVE TO THE ELEMENT'S OWN FONT-SIZE, so on this slide they
+// are computed against a 112px stat and a now-47px label rather than against body
+// text. Doubling the label alone pushed the row about 40px taller and knocked the
+// source line off the bottom of the canvas, and it opened a ~70px gap between each
+// number and the label that explains it, which read as two unrelated rows.
+//
+// Zeroing them does both jobs at once. The label now sits with its number, which is
+// the whole point of a label, and the source line is back on the slide.
+a hook slide .stat p,
+a hook slide .stat-label p { margin: 0; }
+a hook slide .stat-label { margin-top: .1em; }
+
+// The asterisk on 35% is the hybrid caveat, added 2026-09-12 by choice.
+// It has to be small enough to read as a footnote marker rather than as part of the
+// number, and raised, so "35%*" never looks like "35%" times something. Its own
+// line-height is zeroed so it cannot add to the row's height, which on this slide
+// is measured to the pixel; see the paragraph-margin note above.
+a hook slide .stat-star {
+  font-size: .34em;
+  vertical-align: super;
+  line-height: 0;
+  margin-left: .06em;
+  color: var(--c-gold-text);
+}
+.reveal .stat-row {
+  display: flex;
+  gap: 2.6em;
+  margin: .8em 0 .7em 0;
+  align-items: flex-end;
+}
+
+// a hook slide's row got taller on 2026-09-12, when the labels were rewritten to say what
+// each number actually measures. At 1.44em the label font computes to 47.5px, so
+// "primarily at home, pre-2020" needs about 650px on one line and three of those do
+// not fit across 1214px. TWO-LINE LABELS ARE UNAVOIDABLE IF THE LABELS STAY
+// PRECISE, and the precision is the point of the rewrite, so the height comes back
+// out of the spacing instead.
+//
+// ⚠️ WIDENING THE COLUMNS DOES NOT HELP AND WAS TRIED. `flex: 1 1 0` makes each
+// exactly a third, which is NARROWER than the middle label needs, so it wraps
+// anyway. Measured: 3.3px of slack before these three rules, 51.9px after, which is
+// 11.9px clear of reveal's control icons. Screenshotted, not just measured.
+a hook slide .stat-row { margin: .2em 0 .25em 0; }
+a hook slide .tint { padding-top: .5em; padding-bottom: .5em; }
+a hook slide .source { margin-top: .3em; }
+
+// --- Headings ----------------------------------------------------------------
+// TITLE BAND. Lifted from the reference PowerPoint deck, which puts a 40pt
+// bold Arial title in a fixed band at the top left of every slide, 7.4% of the
+// slide height, and never moves it. That consistency is most of why that deck
+// reads as professional. The gold underline that used to sit here hugged the
+// text width, so it moved with every title and the band never settled.
+.reveal h2 {
+  color: $ink;
+  font-weight: 700;
+  font-size: 1.55em;
+  letter-spacing: -0.02em;
+  line-height: 1.12;
+  text-align: left;
+  border-bottom: 1px solid $rule;
+  padding-bottom: .3em;
+  display: block;
+  margin: 0 0 .62em 0;
+}
+
+// --- Section dividers --------------------------------------------------------
+// A full-bleed teal slide between acts. Reads as a breath, not a slide.
+.reveal section[data-background-color="#10243A"] h1,
+.reveal section[data-background-color="#1F4E79"] h1 {
+  color: #FFFFFF;
+  border: none;
+  font-weight: 300;
+  letter-spacing: -0.02em;
+}
+
+// --- Source line -------------------------------------------------------------
+.reveal .source {
+  font-size: 0.5em;
+  color: lighten($ink, 40%);
+  margin-top: .7em;
+}
+
+// --- Emphasis ----------------------------------------------------------------
+.reveal .hl {
+  background: linear-gradient(transparent 62%, rgba(224,161,6,.45) 62%);
+  font-weight: 600;
+}
+
+// Tables: lighter than the inherited default, closer to the AoM look.
+.reveal table { font-size: 0.78em; border-collapse: collapse; }
+.reveal table th {
+  border-bottom: 2px solid $primary-blue;
+  color: $teal-deep;
+  font-weight: 600;
+  text-align: left;
+}
+.reveal table td { border-bottom: 1px solid $rule; }
+
+
+// ==============================================================================
+// SECTION DIVIDERS THAT CARRY CONTENT
+// ==============================================================================
+// A divider holding one word reads as a blank slide, and the audience registers
+// it as a stall. These carry a number, a title, and a line saying what is coming,
+// which fills the slide and does actual work.
+
+.reveal .divider {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  // Full-bleed teal panel painted by the divider itself rather than relying on
+  // reveal's separate background layer. That layer does render in a real
+  // browser, but it paints outside the slide element, so anything that captures
+  // the slide on its own — headless screenshots, thumbnails, print-to-PDF — gets
+  // white text on white. Painting it here makes the slide self-contained.
+  background: $teal-deep;
+  color: #FFFFFF;
+  // 720px, the canvas height, NOT 100vh. See the vh banner further down.
+  // At 100vh this bled past the slide by however much taller the window
+  // was than the canvas, which is why dividers measured ~150px of overflow.
+  min-height: 720px;
+  margin: -3.2em -3em;
+  padding: 3.4em 3.2em;
+  border-radius: 0;
+}
+
+// The heading on a divider slide is a placeholder that exists only to carry the
+// slide id and background attribute. Showing it leaves an empty white band.
+.reveal section.divider-slide { padding-top: 0; }
+.reveal section.divider-slide > h2 { display: none; }
+.reveal .divider .num {
+  font-size: 0.72em;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  opacity: .62;
+  margin-bottom: .35em;
+}
+.reveal .divider .big {
+  font-size: 2.5em;
+  font-weight: 300;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+  margin-bottom: .3em;
+}
+.reveal .divider .lede {
+  font-size: 0.95em;
+  opacity: .9;
+  max-width: 20em;
+  line-height: 1.4;
+  border-top: 3px solid rgba(255,255,255,.35);
+  padding-top: .5em;
+}
+
+// A lede carrying a list rather than a sentence. Added 2026-09-08 for #study1,
+// where the sampling detail became three bullets. The default lede is capped at
+// 20em, which is right for one line of prose and far too narrow for a bullet
+// carrying a quoted question stem, so this widens it and restores list marks
+// that the deck otherwise suppresses on divider slides.
+.reveal .divider .lede.lede-list {
+  max-width: 40em;
+  font-size: 0.86em;
+  line-height: 1.42;
+
+  ul { margin: 0; padding-left: 1.15em; list-style: disc; }
+  li { margin: 0 0 .42em 0; }
+  li:last-child { margin-bottom: 0; }
+  strong { font-weight: 700; }
+}
+
+// --- A divider that opens onto a paper ---------------------------------------
+// A `.sub` for the paper's subtitle and a `.byline` for its authors, so the
+// divider that introduces a study can carry the full attribution instead of the
+// title slide.
+//
+// ⚠️ AN AUTHOR LIST IS NOT DECORATION. If the work is coauthored, volunteer that
+// rather than be caught by it, and put the names where the audience is already
+// reading. Do not quietly drop the byline to buy vertical space.
+//
+// These are their own classes rather than `.lede`, deliberately. `.lede` carries
+// a `max-width: 20em` and a top hairline that suit one line of prose, and every
+// other divider depends on both. Restyling it for this case would reach all of
+// them.
+.reveal .divider .sub {
+  font-size: 0.95em;
+  opacity: .9;
+  max-width: 26em;
+  line-height: 1.4;
+  margin-bottom: .1em;
+}
+
+// The hairline sits ABOVE the byline, so the slide reads title, subtitle, rule,
+// team. One `<p>` of hard-wrapped lines rather than a list: reveal's own
+// `.reveal .slide ol li` and `ul li` margins outspecify anything the theme sets
+// at two classes, a trap recorded in CLAUDE.md, and a byline needs no bullets.
+.reveal .divider .byline {
+  font-size: 0.7em;
+  line-height: 1.75;
+  opacity: .82;
+  border-top: 3px solid rgba(255,255,255,.35);
+  padding-top: .55em;
+  margin-top: .55em;
+  // The rule is a rule, not a border on the slide. Left unbounded it ran the
+  // full 1200px of the panel while the five rows under it end at 558px, which
+  // read as a horizontal line with a list tucked under one end of it. 26em at
+  // this font-size is 600px, just past the longest row. Every other divider's
+  // hairline is short for the same reason — `.lede` caps at 20em.
+  max-width: 26em;
+
+  p { margin: 0; font-weight: 300; }
+  // The presenting author. Positional in the PAPER's author order, same as the
+  // title slide's old rule was, so it is `strong` in the markup rather than a
+  // count here — nothing breaks if the team is ever reordered.
+  //
+  // THE SECONDARY COLOUR SINCE 2026-09-12, by choice, name AND affiliation. It is the
+  // one thing on this slide the room needs to find, and weight alone was not enough
+  // against four other names in white.
+  //
+  // `strong + em` reaches the affiliation and reaches NOTHING ELSE: every other row
+  // is a bare text node followed by its `em`, and an adjacent-sibling combinator
+  // skips text nodes, so only the row that has a `strong` matches. Do not switch this
+  // to `:has()` or to an nth-child count.
+  strong,
+  strong + em { color: $primary-gold; }
+  strong { font-weight: 700; opacity: 1; }
+  // The separator between a name and its affiliation, matching the title slide's
+  // author rows. A middot rather than a comma, because affiliations contain
+  // commas in principle and a middot reads at the back of a room.
+  em {
+    font-style: normal;
+    opacity: .72;
+    &::before { content: "\00b7"; margin-right: 0.4em; opacity: .55; }
+  }
+}
+
+// #study2's title is a whole question rather than a phrase, changed 2026-09-09.
+// At the divider default of 2.5em it ran to three long lines and pushed the
+// panel's content to within 4.2px of the bottom of the canvas and 17.4px of the
+// top, against #study1's comfortable 49.7 to 683.5. Measured, both slides, same
+// pass. This is the size that gives it back the same breathing room.
+#study2 .divider .big { font-size: 1.78em; }
+
+// The divider heading gives up a little size when it sits above a list rather
+// than a single lede line. 2.5em over three bullets overflows the panel.
+.reveal .divider:has(.lede-list) .big { font-size: 2.05em; }
+
+// Section-divider slides hide the h2 rule that body slides use.
+.reveal section[data-background-color] h2 { border-bottom: none; color: #FFFFFF; }
+
+
+// ==============================================================================
+// CLICK-TO-REVEAL DETAIL PANEL (bar chart drill-down)
+// ==============================================================================
+.reveal .detail-panel {
+  background: #FFFFFF;
+  border-radius: 14px;
+  border-left: 5px solid $primary-blue;
+  box-shadow: 0 1px 3px rgba(38,38,38,.10), 0 6px 18px rgba(38,38,38,.06);
+  padding: .7em .9em;
+  font-size: 0.62em;
+  line-height: 1.4;
+  min-height: 8.2em;
+}
+.reveal .detail-panel .dp-hint { color: #7E8B8E; font-style: italic; }
+.reveal .detail-panel .dp-head {
+  font-weight: 700; color: $teal-deep; margin-bottom: .3em; font-size: 1.1em;
+}
+.reveal .detail-panel table { font-size: 1em; width: 100%; margin: 0; }
+.reveal .detail-panel td { padding: .12em .5em .12em 0; border: none; }
+.reveal .detail-panel .num { font-variant-numeric: tabular-nums; }
+.reveal .detail-panel .bad  { color: #B26A00; font-weight: 600; }
+.reveal .detail-panel .good { color: $teal-deep; font-weight: 600; }
+
+// --- Provisional numbers ----------------------------------------------------
+//
+// A deck often has to show a number before its analysis is final. Marking those
+// slides in the CSS beats remembering which ones they were.
+//
+// Any slide carrying an unfinalized number gets `.provisional`. It draws a small
+// corner tag, legible to you in speaker view and effectively invisible from the
+// back of a room at 1/6 opacity. When the numbers are settled, grepping for
+// "provisional" is the whole checklist.
+.reveal section.provisional::after {
+  content: "provisional";
+  position: absolute;
+  top: 0.15em;
+  right: 0.15em;
+  font-size: 0.34em;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--c-gold-dark);
+  opacity: 0.17;
+  pointer-events: none;
+}
+
+
+// ==============================================================================
+// NEVER SIZE A SLIDE COMPONENT IN vh.
+// ==============================================================================
+// The reveal canvas is a FIXED 1280x720 that gets scaled by a CSS transform to
+// fit whatever window it is in. `vh` does not know that. It resolves against the
+// real browser viewport, so on a large display 68vh becomes ~880px on a 720px
+// slide and the content is pushed off the bottom, out of view. The slide renders
+// as blank white with no error anywhere.
+//
+// Reported 2026-09-02 as "slide 2 is just blank white for me" and reproduced:
+// the same rule computed to 520px on a 788px window and would exceed the canvas
+// on anything taller. The `vh` here predates the restyle on .cards and was
+// copied onto three new components, which is what made it visible.
+//
+// Use canvas pixels. The slide is 720 tall, the title band spends about 102, so
+// roughly 618 is available and these sit just under it.
+// ==============================================================================
+
+// ==============================================================================
+// LAYOUT COMPONENTS BEYOND CARDS
+// ==============================================================================
+//
+// WHY THESE EXIST. Eight of twenty-two main slides were the same two-or-three
+// rounded-card row. The eye stops reading a pattern it has already seen eight
+// times, so the structure stopped doing any work. The reference deck avoids this by
+// varying the shape of the slide constantly while keeping the title band fixed.
+//
+// The rule now: .cards is for two or three PARALLEL OBJECTS of equal weight.
+// --- A ROW OF LOGOS OR OTHER SMALL MARKS --------------------------------------
+//
+// No marks ship with this kit. Trademarks are not ours to redistribute, so add
+// your own spans and your own base64 below.
+//
+// ⚠️ THE FLEX ROW GOES ON THE `p`, NOT ON `.logo-row`. Pandoc wraps a line of
+// `[]{.class}` spans in a paragraph, so the div has exactly ONE child and
+// flexing the div lays out that single `<p>`. The spans inside stay block-level
+// and stack VERTICALLY, which renders as a column running off the bottom of the
+// slide. Found by rendering and looking at it; nothing errored and the CSS all
+// matched. This is the general shape of most Pandoc layout surprises: the
+// element you styled is not the element that got your content.
+//
+// ⚠️ IF YOU GREYSCALE A ROW OF BRAND MARKS, CHECK EACH ONE AT FINAL SIZE. Some
+// marks knock their wordmark out of the shape in white and become an unreadable
+// blob in monochrome at 30px, while five others stay crisp. A brightness sweep
+// will not save them. Render it and look.
+.reveal .logo-row {
+  margin: 10px 0 0 0;
+
+  p {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    margin: 0;
+  }
+
+  span {
+    display: block;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    opacity: .9;
+  }
+
+  // One rule per mark. Width and height in canvas pixels, at the mark's own
+  // aspect ratio, so nothing is stretched:
+  //
+  //   .l-example { width: 73px; height: 22px;
+  //                background-image: url("data:image/svg+xml;base64,..."); }
+}
+
+// --- .card-expand's cards: a hairline between definition and practices ---------
+// Added 2026-09-08. Each card is a bold label, then what the kind MEANS, then
+// which practices ARE it. Unbroken, the second and third read as one block and
+// the room has to work out that the last line is a list. A short rule above the
+// last paragraph says "list follows" without adding a heading.
+//
+// Scoped to .card-expand on purpose. Cards elsewhere in the deck do not have this
+// definition-then-list shape and a rule would be noise on them.
+//
+// RETARGETED 2026-09-09. This used to hang off `p:last-child`, which stopped
+// matching the moment the practice list became its own `.card-summary` block
+// with `.card-detail` sitting after it. The rule then vanished silently and
+// nothing in the source said why. Both blocks now name themselves.
+.card-expand .card-summary::before,
+.card-expand .card-detail::before {
+  content: "";
+  display: block;
+  width: 3em;
+  // Strengthened 2026-09-08. At 1px in $rule (#DCE3E5) this was almost invisible
+  // and did not do the job it was added for. It now takes the CARD'S OWN ACCENT
+  // colour, so the empowering card gets the blue edge and the controlling card
+  // the gold one, matching the 5px bar across the top of each. That reads as
+  // part of the card rather than as a stray line.
+  border-top: 2px solid currentColor;
+  color: $primary-blue;
+  opacity: .85;
+  // .38em, not .6em. The rule adds height to the tallest card, and at .6em this
+  // slide measured 13.8px of overflow with the tint clipped at the bottom edge.
+  margin: 0 0 .38em 0;
+}
+.card-expand .card.amber .card-summary::before,
+.card-expand .card.amber .card-detail::before { color: var(--c-gold-dark); }
+
+// Paid for by the rule above. Scoped to .card-expand so no other card row moves.
+// The tint under these cards is two lines and was clipping at the slide edge;
+// these three reclaim the ~14px the rule cost plus a little margin. Measured.
+.card-expand .cards { margin-top: .18em; }
+
+// The two columns are NOT equal here. Empowering carries five practice names and
+// Controlling carries two, so at 1fr each the left card wrapped to five lines
+// while the right card sat half empty. Giving the left column the extra width
+// pulls that list in and buys the tint below the room it needs to name the six
+// outcomes. Added 2026-09-08.
+.card-expand .cards.two { grid-template-columns: 1.32fr 1fr; }
+.card-expand .card  { padding-bottom: .72em; }
+
+// The tint that used to sit under these cards MOVED TO #study1 on 2026-09-09,
+// so the card row gets the ~112px back and claims the slide again rather than
+// floating with white space beneath it. `.tight` zeroes the shared min-height,
+// which was right while the tint was here and wrong now, so .card-expand sets its
+// own. Measured, not guessed: h2 70 + margins 40 leaves 577.
+.card-expand .cards.tight { min-height: 560px; }
+
+// ==============================================================================
+// .card-expand: CLICK A CARD TO SEE THE PRACTICE DEFINITIONS
+// Added 2026-09-09 by choice.
+//
+// The clicked card takes the whole row and swaps its list of practice NAMES for
+// the same practices WITH their definitions. The other card collapses to a
+// labelled spine, which stays clickable so he can swap without going back to
+// the two-card state first.
+//
+// The definitions are the manuscript's own, from `practice_definitions.xlsx`.
+// Nothing here is paraphrased. See the slide's speaker notes.
+//
+// Deliberately NOT reveal fragments. Fragments are linear and this needs to open
+// either card, in any order, as many times as the room asks. It is driven by
+// `framework-cards.html`, which is a click handler and nothing else.
+// ==============================================================================
+
+.card-expand .cards.expandable .card { cursor: pointer; }
+
+// Definitions are hidden until asked for, so the slide still opens as the
+// two-kinds contrast it has always been.
+.card-expand .card-detail { display: none; }
+.card-expand .card.is-open .card-summary { display: none; }
+.card-expand .card.is-open .card-detail  { display: block; }
+
+// TWO COLUMNS, and both reasons are load-bearing. Measured 2026-09-09: at one
+// column the open Empowering card ran 118.7px off the bottom of the slide, and
+// its five definitions are the only content that could overflow here. The open
+// card is also about 1176px wide, so a single column sets a line length no one
+// reads from the back of a room. Two columns fixes the height and the measure
+// at once.
+.card-expand .card-detail ul {
+  margin: 0;
+  padding-left: 1.1em;
+  list-style: disc;
+  column-count: 2;
+  column-gap: 2.2em;
+}
+
+// The definitions set smaller than the card's own body. At the inherited size
+// the five Empowering definitions ran four to five lines each and the list was
+// 566px against about 495 available. This is a drill-down the room asks for
+// rather than a headline, so it can sit below the card's reading size, but not
+// far below. Measured at .82em, not chosen by eye.
+.card-expand .card-detail { font-size: .82em; }
+
+// The one-line tagline ("Grant autonomy, build competence, signal investment")
+// is hidden while a card is open. It is what the kind MEANS, and the
+// definitions underneath are a longer answer to the same question, so it reads
+// as a duplicate exactly when the room is trying to read something else. Worth
+// about 95px, which is what makes .82em enough rather than needing .72em.
+.card-expand .card.is-open > p:nth-of-type(2) { display: none; }
+// Without this a definition splits across the column break mid-sentence.
+.card-expand .card-detail li {
+  margin: 0 0 .5em 0;
+  line-height: 1.3;
+  break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+}
+.card-expand .card-detail li:last-child { margin-bottom: 0; }
+.card-expand .card-detail strong { color: $teal-deep; font-weight: 700; }
+.card-expand .card.amber .card-detail strong { color: var(--c-gold-dark); }
+
+// The open card takes the row and the other becomes a 58px spine. The widths
+// are on the GRID, not on the cards, because the cards are grid items and a
+// width on a stretched item does nothing.
+.card-expand .cards.expandable.open-left  { grid-template-columns: 1fr 58px; }
+.card-expand .cards.expandable.open-right { grid-template-columns: 58px 1fr; }
+
+// The spine. Everything but the label is hidden and the label turns on its side
+// reading bottom to top, which is the convention that does not force a head tilt
+// the wrong way.
+.card-expand .card.is-collapsed {
+  padding: .9em .4em;
+  align-items: center;
+  justify-content: flex-start;
+  overflow: hidden;
+}
+.card-expand .card.is-collapsed > *:not(:first-child) { display: none; }
+.card-expand .card.is-collapsed > p:first-child {
+  margin: 0;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  white-space: nowrap;
+}
+.card-expand .card.is-collapsed > p:first-child > strong { margin: 0; }
+
+// ==============================================================================
+// SPOTLIGHT: one item lit at a time (a takeaways or contribution slide)
+// ==============================================================================
+// Added 2026-09-10 by choice. Everything starts translucent, each click
+// lights ONE item and returns the previous one to translucent. Arrival is all
+// dim; after the third click he advances off the slide.
+//
+// THIS IS REVEAL FRAGMENTS, NOT A CLICK HANDLER, AND THAT IS THE POINT. The five
+// other interactions in this deck are click handlers because they have to reopen
+// in whatever order a question takes. This one is strictly linear and it has to
+// fire from the CLICKER, which drives reveal's own next/prev and nothing else. A
+// mouse handler would not work from the podium.
+//
+// The mechanism is reveal's `.current-fragment`, which it puts on the most
+// recently shown fragment and removes when the next one shows. That is exactly
+// "lit now, dim again after", with no state of our own to keep in sync.
+//
+// ⚠️ THE ITEMS MUST NEVER BE HIDDEN. A reveal fragment is `opacity: 0` until
+// shown, which would make them appear one by one rather than light up in place.
+// `.spot` therefore forces full opacity and visibility on the FRAGMENT BOX, and
+// the dimming is applied to the box's CONTENTS instead. Two different things are
+// being controlled and they must not be the same property on the same element.
+.reveal .spotlight .spot,
+.reveal .spotlight .spot.fragment {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: none !important;
+}
+
+// The dim/lit state. Scoped to the contents so it cannot fight the rule above.
+.reveal .spotlight .spot > * {
+  opacity: .3;
+  transition: opacity .28s ease;
+}
+.reveal .spotlight .spot.current-fragment > * { opacity: 1; }
+
+// A card also carries a border and a background, which stay at full strength
+// while its text dims and make the dimming read as a mistake. Fade the whole
+// card's chrome with it.
+.reveal .spotlight .card {
+  transition: opacity .28s ease, border-color .28s ease, box-shadow .28s ease;
+  border-color: rgba(0,0,0,.06);
+}
+.reveal .spotlight .card.current-fragment {
+  border-color: $primary-blue;
+  box-shadow: 0 6px 20px rgba(16,36,58,.13);
+}
+.reveal .spotlight .card.amber.current-fragment { border-color: $primary-gold; }
+
+// A keyline row has hairlines rather than a box. Lift the rule on the lit row so
+// the highlight reads on a spotlight row the way the border does on a card.
+.reveal .keylines.spotlight > div {
+  transition: border-color .28s ease;
+}
+.reveal .keylines.spotlight > div.current-fragment { border-top-color: $primary-blue; }
+.reveal .keylines.spotlight > div.amber.current-fragment { border-top-color: $primary-gold; }
+
+// ==============================================================================
+// .swap: one click swaps which card is lit
+// ==============================================================================
+// Added 2026-09-12 by choice. The slide arrives with the LEFT card at
+// full strength and the RIGHT one translucent. One clicker press swaps them.
+//
+// ⚠️ NOT `.spotlight`, AND THE DIFFERENCE IS THE ARRIVAL STATE. A spotlight run
+// arrives with everything dim and lights items one at a time, so it would need two
+// clicks here and the left card would start translucent. This is one fragment plus
+// an `is-lit` class that background-spotlight.html toggles from reveal's own
+// fragment events. See that file for why it is JS and not `:has()`.
+//
+// ⚠️ THE FRAGMENT BOX AND ITS CONTENTS ARE TWO DIFFERENT ELEMENTS, exactly as on
+// `.spot`. The box is forced to full opacity so reveal cannot hide it, and the
+// DIMMING is applied to the box's children. Collapse them into one and the right
+// card vanishes on arrival instead of sitting translucent.
+.swap .bg-right.fragment {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: none !important;
+}
+.swap .bg-left,
+.swap .bg-right {
+  transition: border-color .28s ease, box-shadow .28s ease;
+}
+.swap .bg-left > *,
+.swap .bg-right > * { transition: opacity .28s ease; }
+
+// Arrival: left lit, right translucent.
+.swap .bg-right > * { opacity: .3; }
+.swap .bg-right { border-color: rgba(0,0,0,.06); }
+
+// After the click: they swap. A card carries a border and a background as well as
+// text, and leaving the chrome at full strength while the text dims reads as a
+// rendering fault rather than as a choice, so the border moves with it.
+.swap.is-lit .bg-right > * { opacity: 1; }
+.swap.is-lit .bg-right {
+  border-color: $primary-gold;
+  box-shadow: 0 6px 20px rgba(224,161,6,.22);
+}
+.swap.is-lit .bg-left > * { opacity: .3; }
+.swap.is-lit .bg-left { border-color: rgba(0,0,0,.06); }
+
+
+
+// ==============================================================================
+// THE LAYOUT COMPONENTS: .keylines, .versus, .statement
+// ==============================================================================
+//
+// WHY THESE EXIST, and it is the single most useful thing in this file.
+//
+// A deck built out of one component gets BOX FATIGUE. Eight of twenty-two main
+// slides in the deck this came from were the same two-or-three rounded-card row.
+// Each one looked fine alone. Together they read as one slide shown eight times,
+// so the structure stopped doing any work and the audience stopped reading it.
+//
+// PICK THE COMPONENT BY WHAT THE CONTENT IS, not by habit:
+//
+//   ::: {.cards}     two or three PARALLEL OBJECTS of equal weight
+//   ::: {.versus}    a genuine BINARY. Two columns, one hairline, no boxes
+//   ::: {.keylines}  a short LIST of points. Rule-separated rows, no boxes
+//   ::: {.statement} ONE SENTENCE that deserves silence around it
+//
+// If the content is a contrast, use .versus. If it is a short list of points,
+// use .keylines. If it is one sentence that matters, use .statement. Reach for
+// .cards only when the things really are parallel objects.
+// --- Keylines: rule-separated rows, no boxes ---------------------------------
+// The default replacement for a card row. Same information, a fraction of the
+// chrome. A bold label, then the text, separated by hairlines.
+.reveal .keylines {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 490px;   // canvas px, never vh. See the banner above.
+  margin-top: 0.2em;
+}
+.reveal .keylines > div {
+  padding: 0.72em 0 0.78em 0;
+  border-top: 1px solid $rule;
+  font-size: 0.94em;
+  line-height: 1.42;
+}
+.reveal .keylines > div:last-child { border-bottom: 1px solid $rule; }
+.reveal .keylines > div > p:first-child > strong:only-child {
+  display: block;
+  color: $teal-deep;
+  font-weight: 700;
+  font-size: 1.06em;
+  letter-spacing: -0.01em;
+  margin: 0 0 .2em 0;
+}
+.reveal .keylines p { margin: 0 0 .25em 0; }
+.reveal .keylines p:last-child { margin-bottom: 0; }
+// Accent the row that carries the weight.
+.reveal .keylines > div.lead > p:first-child > strong:only-child { color: $primary-blue; }
+.reveal .keylines > div.amber > p:first-child > strong:only-child { color: var(--c-gold-text); }
+
+// --- Versus: two columns, one hairline, no boxes ------------------------------
+// For a genuine binary. The single vertical rule does what two boxes were doing
+// and does not compete with the type.
+.reveal .versus {
+  // Two columns, and the rule is a border on the second rather than a third
+  // empty div. Keeps the markdown to two blocks like .cards does.
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 2.2em;
+  align-items: start;
+  min-height: 466px;   // canvas px, never vh. Trimmed from 480 to keep
+                       // .versus plus a callout off the knife edge; a
+                       // podium machine picking a different font fallback
+                       // should not be able to tip it over.
+  margin-top: 0.35em;
+}
+// A versus whose two sides are very different in length. Where one column
+// carries three paragraphs against two short ones, 1fr 1fr runs the long side
+// off the bottom while the short side sits half empty. Widen it instead of
+// shrinking the type.
+//
+// ⚠️ THE RATIO IS PER SLIDE AND IT HAS TO BE MEASURED. On a real deck 1.8fr/1fr
+// was right for one slide and ran 234.9px off the bottom on another once its
+// right column gained a paragraph; 1.2fr/1fr evened that one up and 1.35fr still
+// ran 10.1px over. Override it on the slide, keep the override scoped to that
+// slide's id, and record the number you measured.
+.reveal .versus.lopsided { grid-template-columns: 1.8fr 1fr; }
+
+.reveal .versus > div { font-size: 0.94em; line-height: 1.45; }
+.reveal .versus > div:last-child { border-left: 1px solid $rule; padding-left: 2.2em; }
+.reveal .versus > div > p:first-child > strong:only-child {
+  display: block;
+  font-weight: 700;
+  font-size: 1.1em;
+  letter-spacing: -0.01em;
+  margin: 0 0 .4em 0;
+  text-transform: uppercase;
+  font-size: 0.78em;
+  letter-spacing: 0.09em;
+}
+.reveal .versus > div:first-child > p:first-child > strong:only-child { color: $primary-blue; }
+.reveal .versus > div:last-child  > p:first-child > strong:only-child { color: var(--c-gold-text); }
+.reveal .versus p { margin: 0 0 .5em 0; }
+
+// --- Statement: one sentence, given the whole slide ---------------------------
+// The PC deck punctuates with full-bleed section slides at 60pt. This is the
+// in-deck version. Use it where a claim deserves silence around it.
+.reveal .statement {
+  display: flex;
+  align-items: center;
+  min-height: 450px;   // canvas px, never vh.
+  font-size: 1.5em;
+  font-weight: 600;
+  line-height: 1.28;
+  letter-spacing: -0.02em;
+  color: $teal-deep;
+  max-width: 88%;
+}
+// Emphasised words in a statement are the institution GOLD, changed 2026-09-08 at the speaker's
+// use where two words are the two halves of one question.
+//
+// ⚠️ THIS IS --c-gold-text (#6B4A02), NOT raw the institution gold (#E0A106), AND THAT IS
+// DELIBERATE. #E0A106 on white is roughly 1.7:1 contrast. It is fine as a large
+// title-slide subtitle where the eye has nowhere else to go, and it is close to
+// unreadable as emphasis inside a sentence at the back of a seminar room. The
+// theme already draws this distinction, which is why --c-gold-text exists and
+// why .keylines .amber uses it. It still reads unmistakably as gold.
+.reveal .statement em { color: var(--c-gold-text); font-style: normal; font-weight: 700; }
+
+// A statement carrying the whole slide. If the slide is one sentence and nothing else,
+// it can take type far larger than the default 1.5em. Measured at 2.35em with
+// both lines intact; do not raise it without re-measuring, because the second
+// line wraps before the first does.
+.reveal .statement.big-statement {
+  font-size: 2.35em;
+  line-height: 1.18;
+  max-width: 94%;
+}
+
+.reveal .divider .big { font-weight: 700; letter-spacing: -0.025em; }
+
+
+// --- Placeholder: an asset that is NOT here yet -------------------------------
+// Added 2026-09-05 with the teaching half, which needs a simulation screenshot
+// and a screen recording that only the speaker can produce.
+//
+// This is deliberately loud. The failure it prevents is a deck that renders
+// clean, passes every automated check, and shows a search committee an empty
+// gap where a screenshot was supposed to be. A dashed amber box with the word
+// MISSING in it cannot be presented by accident, which a blank div can.
+//
+// `grep -rn "placeholder" master/` is the whole checklist. Delete the block
+// when the asset lands; delete this rule when the last one is gone.
+.reveal .placeholder {
+  border: 2px dashed $primary-gold;
+  border-radius: 6px;
+  background: rgba(224, 161, 6, 0.07);
+  color: $teal-deep;
+  padding: 0.75em 1em;
+  margin: 0.7em 0;
+  font-size: 0.72em;
+  line-height: 1.4;
+  text-align: center;
+}
+.reveal .placeholder strong { color: #7A5605; letter-spacing: 0.03em; }
+.reveal .placeholder video { width: 100%; height: auto; border-radius: 4px; }
+
+// --- .tight: a layout block that SHARES its slide ------------------------------
+// Added 2026-09-05 by the layout audit that built the teaching half.
+//
+// .cards, .keylines and .versus each claim most of the canvas on purpose
+// (458px, 490px, 466px). That is right when the block owns the slide, and it is
+// why a card row stopped floating in a sea of white. It is WRONG the moment the
+// same slide also carries a .tint, a .source or a .placeholder, because the
+// callout is then pushed straight off the bottom edge.
+//
+// The trap is that the overflow does not respond to editing the text. The block
+// is a fixed height, so cutting a line out of a card changes nothing at all.
+// Eight slides were over by 20 to 89px and every one of them was invisible in
+// the source. Reach for .tight before rewriting prose.
+//
+// `grep -rn "\.tight" master/` lists every slide relying on this.
+.reveal .cards.tight,
+.reveal .keylines.tight,
+.reveal .versus.tight { min-height: 0; }
+
+// --- A trap in the .keylines rule above, recorded 2026-09-05 ------------------
+// `.keylines > div > p:first-child > strong:only-child` sets `display: block`,
+// which is what makes the bold label read as a heading with its body beneath.
+//
+// CSS `:only-child` counts ELEMENT siblings and ignores text nodes. So in
+// `<p><strong>Label</strong> · body text</p>` the strong is STILL :only-child and
+// STILL becomes a block. Writing a keyline row as "**Label** · body" therefore
+// renders on two lines, exactly like "**Label**" followed by a paragraph.
+//
+// Consequence for anyone trimming a slide: collapsing a keyline row onto one
+// markdown line SAVES NO VERTICAL SPACE. A row is ~147 canvas px either way, so
+// three rows are ~441px and that is fixed. Cut a whole row, or shrink the
+// callout sharing the slide. Do not rephrase and expect the height to move.
+//
+// It also looks WRONG. Writing "**Label** · body" puts the label on its own line
+// and leaves the separator stranded at the start of the next one, reading as
+// "· body". Six of these shipped into the first teaching build and only a
+// screenshot caught them; every geometry check passed. Write a keyline row as a
+// bold label, a blank line, then the body. The same applies to .card headings.
+

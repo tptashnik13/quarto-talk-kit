@@ -1,0 +1,72 @@
+<script>
+/*
+  ONE CLICK MOVES THE LIGHT FROM THE LEFT COLUMN TO THE RIGHT ONE.
+
+  Put `.swap` on the slide, `.bg-left` on the column that is lit on arrival, and
+  `.bg-right .fragment` on the one that lights on the first clicker press. The
+  slide arrives with the left side at full strength and the right side
+  translucent. One press swaps them.
+
+  WHY THE RIGHT COLUMN IS A REVEAL FRAGMENT AND NOT A CLICK TARGET.
+  It has to fire from the CLICKER at the podium, which drives reveal's next and
+  prev and nothing else. A mouse handler is no use there. Anything that must
+  happen while your hands are not on the laptop has to be a fragment. Compare
+  card-expand.html, which is the opposite trade.
+
+  WHY THE DIMMING IS NOT PLAIN `.spotlight`.
+  A `.spotlight` run arrives with EVERYTHING dim and lights items one at a time,
+  so it needs two presses and the left column starts translucent. This is one
+  fragment plus a class on the section.
+
+  WHY THIS IS JAVASCRIPT AND NOT CSS `:has()`.
+  This is the trap worth carrying away. `:has(.fragment.visible)` against a class
+  reveal adds at runtime fired on BACKWARD arrival and not on forward clicks, and
+  forward is the direction you present in. A class toggled from reveal's own
+  fragment events cannot drift like that. Read the state, do not count clicks.
+
+  ⚠️ The companion CSS forces the fragment BOX to full opacity and dims the box's
+  CONTENTS. Two different elements. Collapse them into one and the right column
+  disappears on arrival instead of sitting translucent.
+
+  Offline safe. No dependencies.
+*/
+(function () {
+
+  function sync(slide) {
+    // `.visible` is reveal's own class on a shown fragment. Reading it here rather
+    // than counting clicks means backing up with the clicker resets the slide
+    // correctly, and so does arriving at it backwards from the following slide.
+    var lit = !!slide.querySelector('.bg-right.visible');
+    slide.classList.toggle('is-lit', lit);
+  }
+
+  function wire() {
+    var slides = document.querySelectorAll('section.swap');
+    for (var i = 0; i < slides.length; i++) {
+      (function (slide) {
+        if (slide.dataset.swapWired === '1') return;
+        if (!slide.querySelector('.bg-right')) return;
+        slide.dataset.swapWired = '1';
+        sync(slide);
+        if (window.Reveal && Reveal.on) {
+          Reveal.on('fragmentshown',  function () { sync(slide); });
+          Reveal.on('fragmenthidden', function () { sync(slide); });
+          Reveal.on('slidechanged',   function () { sync(slide); });
+        }
+      })(slides[i]);
+    }
+  }
+
+  function boot() {
+    wire();
+    if (window.Reveal && Reveal.on) Reveal.on('ready', wire);
+    window.addEventListener('load', wire);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+})();
+</script>

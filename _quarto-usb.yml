@@ -1,0 +1,31 @@
+# USB / emergency profile.
+#
+# WHY THIS FILE EXISTS: revealjs's chalkboard plugin and `embed-resources: true`
+# are mutually exclusive. Quarto errors out rather than choosing for you:
+#
+#   ERROR: Reveal plugin 'RevealChalkboard' is not compatible with self-contained output
+#
+# So there are two builds instead of one compromise.
+#
+#   Default build → a FOLDER (.html + _files/). Chalkboard works. Fully offline,
+#                   zero external requests, but you must copy the WHOLE folder.
+#   This profile  → ONE single .html. No chalkboard. Copy one file anywhere.
+#
+# Render with:  quarto render master/talk.qmd --profile usb
+#
+# Take the USB build to the talk as the fallback. If the podium machine is
+# hostile, or you are handed a stranger's laptop, or something ate the _files
+# directory, one file always opens.
+
+format:
+  revealjs:
+    # A distinct filename so the two builds sit side by side. Without it both
+    # write talk.html and whichever ran last silently wins, which is how you end
+    # up presenting from a deck with no chalkboard.
+    #
+    # A separate output-dir is the wrong fix: Quarto RELOCATES existing outputs
+    # when output-dir changes, so the usb render carries the presenting build
+    # away with it. A filename lands beside each deck in its own folder.
+    output-file: talk-usb.html
+    embed-resources: true
+    chalkboard: false

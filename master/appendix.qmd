@@ -1,0 +1,71 @@
+## &nbsp; {#appendix .divider-slide background-color="#10243A" visibility="uncounted"}
+
+::: {.divider}
+::: {.num}
+Appendix
+:::
+::: {.big}
+The slides you hope to need
+:::
+::: {.sub}
+Everything past "Thank you" is here for questions. It does not count toward the
+progress bar and the room never sees it unless you go there
+:::
+:::
+
+::: {.notes}
+`visibility="uncounted"` is what keeps these out of the slide count and off the
+progress bar. Put it on every appendix slide.
+
+⚠️ LEARN THE NUMBERS FOR THREE OR FOUR OF THESE AND WRITE THEM ON A CARD.
+Hunting through the `m` menu while a senior person waits costs you more than the
+slide gains you. Typing a number and pressing Enter is instant.
+:::
+
+## What an appendix slide is for {#apx-purpose visibility="uncounted"}
+
+::: {.keylines}
+::: {.lead}
+**It answers a question out loud**
+
+One slide, one question, and the title IS the answer. Not a dump of what did not
+fit in the talk.
+:::
+::: {}
+**Build it from the questions you expect**
+
+List what a hostile listener will ask. Every item needing a picture, a table or
+a number becomes one appendix slide.
+:::
+::: {}
+**A slide you cannot find is a slide you do not have**
+
+Know the number. Searching while someone waits costs more than the slide gains.
+:::
+:::
+
+::: {.notes}
+The discipline here is the same as for the main deck. An appendix slide whose
+title is "Robustness checks" makes the room read the whole slide to find out
+whether it answers them. "The result holds when the outliers are dropped" does
+not.
+:::
+
+## Numbers that are not final yet {#apx-provisional .provisional visibility="uncounted"}
+
+::: {.statement}
+A number on a projected slide is read by the room and written down. A number in
+a draft is not.
+:::
+
+::: {.notes}
+This slide carries the `.provisional` class, which draws a faint corner tag.
+Look at the top right.
+
+It is legible to you in speaker view and effectively invisible from the back of
+a room at 1/6 opacity. The point is that you cannot forget which slides are
+carrying unfinished numbers, because grepping the sources for "provisional" is
+the whole checklist.
+
+Delete the class as each analysis settles.
+:::

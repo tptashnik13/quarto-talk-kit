@@ -1,0 +1,119 @@
+<script>
+/*
+  CLICK A CARD TO EXPAND IT.
+
+  Put `.card-expand` on the slide and `.cards.expandable` on the row inside it.
+  Clicking either card gives it the whole row and swaps its summary for its
+  detail. The other card collapses to a labelled spine, which stays clickable so
+  you can swap straight across without closing first. Clicking the open card
+  closes it and both come back.
+
+  WHY A CLICK HANDLER AND NOT REVEAL FRAGMENTS. Fragments are linear and
+  one-directional. This has to open either card, in any order, as many times as
+  the room asks a follow-up, and it has to close again so the original contrast is
+  back on screen for the next slide. A fragment sequence cannot do that.
+
+  The trade is that a click handler needs a mouse or a keyboard, and a presentation
+  clicker drives reveal's next/prev and nothing else. If the interaction has to
+  fire from the podium clicker, use a fragment instead. See spotlight-swap.html.
+
+  All state lives in classes the stylesheet owns:
+    .cards.open-left / .open-right   the grid column widths
+    .card.is-open                    shows .card-detail, hides .card-summary
+    .card.is-collapsed               the spine
+
+  The CSS assumes EXACTLY TWO cards. Three will lay out wrong rather than error.
+
+  Offline safe. No dependencies, no fetches, no timers.
+*/
+(function () {
+
+  function wireOne(grid) {
+    if (grid.dataset.wired === '1') return;
+    grid.dataset.wired = '1';
+
+    var cards = grid.querySelectorAll(':scope > .card');
+    if (cards.length !== 2) return;   // the CSS assumes exactly two columns
+
+    function close() {
+      grid.classList.remove('open-left', 'open-right');
+      for (var i = 0; i < cards.length; i++) {
+        cards[i].classList.remove('is-open', 'is-collapsed');
+        cards[i].setAttribute('aria-expanded', 'false');
+      }
+    }
+
+    function open(idx) {
+      close();
+      grid.classList.add(idx === 0 ? 'open-left' : 'open-right');
+      cards[idx].classList.add('is-open');
+      cards[idx].setAttribute('aria-expanded', 'true');
+      cards[1 - idx].classList.add('is-collapsed');
+    }
+
+    grid._closeCards = close;
+
+    for (var i = 0; i < cards.length; i++) {
+      (function (card, idx) {
+        card.setAttribute('role', 'button');
+        card.setAttribute('tabindex', '0');
+        card.setAttribute('aria-expanded', 'false');
+
+        card.addEventListener('click', function (e) {
+          // Reveal does not navigate on a body click, but the chalkboard plugin
+          // DOES listen on the slide. Keep the event here.
+          e.stopPropagation();
+          if (card.classList.contains('is-open')) close(); else open(idx);
+        });
+
+        // Enter and Space, so the card is reachable without a mouse. A podium
+        // machine with a broken trackpad is a real failure mode.
+        card.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+            e.preventDefault();
+            e.stopPropagation();
+            if (card.classList.contains('is-open')) close(); else open(idx);
+          }
+        });
+      })(cards[i], i);
+    }
+  }
+
+  function wire(root) {
+    var grids = root.querySelectorAll('.card-expand .cards.expandable');
+    for (var i = 0; i < grids.length; i++) wireOne(grids[i]);
+  }
+
+  function boot() {
+    // Quarto's reveal bootstrap may not have run yet. Wiring the DOM does not
+    // depend on Reveal being ready, so do it now and attach the reset hook only
+    // if Reveal is already there.
+    wire(document);
+
+    if (window.Reveal && Reveal.on) {
+      Reveal.on('ready', function () { wire(document); });
+
+      // Leaving a slide resets it. Without this, coming back from an appendix
+      // slide during questions lands on whatever was last expanded, which is not
+      // the state the next slide is written against.
+      Reveal.on('slidechanged', function (ev) {
+        var grids = document.querySelectorAll('.card-expand .cards.expandable');
+        for (var i = 0; i < grids.length; i++) {
+          var onThisSlide = ev.currentSlide && ev.currentSlide.contains(grids[i]);
+          if (!onThisSlide && grids[i]._closeCards) grids[i]._closeCards();
+        }
+      });
+    } else {
+      document.addEventListener('reveal.ready', function () { wire(document); });
+      // Last resort for load-order surprises. One deferred pass, no polling.
+      window.addEventListener('load', function () { wire(document); });
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+})();
+</script>

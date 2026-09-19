@@ -1,0 +1,346 @@
+---
+title: "A Talk Built From Text"
+subtitle: "Every slide in this deck is a demonstration of one thing"
+author:
+  - name: Your Name
+    affiliations: Your Institution
+date: today
+date-format: long
+---
+
+```{r setup}
+#| include: false
+#
+# ⚠️ ATTENTION. THESE NOTES LIVE INSIDE THE SETUP CHUNK ON PURPOSE.
+#
+# Quarto emits ANY content between the YAML header and the first `##` as its own
+# slide, and an HTML comment counts as content. Notes written above the first
+# heading therefore produce a permanently BLANK SLIDE 2, which survives every
+# layout audit because an empty slide has nothing to overflow and nothing to
+# misalign. `include: false` guarantees this chunk emits nothing, so notes are
+# safe here. Run tools/check_blank_slides.py after every render.
+#
+# ==============================================================================
+# WHAT THIS DECK IS
+#
+# A working demonstration of the components in theme/talk.scss. Every slide
+# exists to show one thing, and its ::: {.notes} block says what and why.
+#
+# ⚠️ EVERY NUMBER IN THIS DECK IS INVENTED. figures/data/demo_results.csv is
+# fabricated. Delete it before this repo becomes your deck.
+#
+# PICK THE COMPONENT BY WHAT THE CONTENT IS, not by habit:
+#
+#   ::: {.cards}     two or three PARALLEL OBJECTS of equal weight
+#   ::: {.versus}    a genuine BINARY. Two columns, one hairline, no boxes
+#   ::: {.keylines}  a short LIST of points. Rule-separated rows, no boxes
+#   ::: {.statement} ONE SENTENCE that deserves silence around it
+#
+# A deck built out of one component gets BOX FATIGUE: each slide looks fine
+# alone and together they read as one slide shown eight times.
+#
+# NEVER HARDCODE A NUMBER. Figures read a .csv. Numbers in prose come from an
+# `r ...` call. See figures/R/demo_figure.R for why.
+# ==============================================================================
+#
+# Quarto may launch R under the C locale. htmlwidgets then serializes UTF-8
+# punctuation in Plotly labels as literal byte markers such as <c2><b7>. Set the
+# character locale before any figure code constructs labels.
+invisible(Sys.setlocale("LC_CTYPE", "en_US.UTF-8"))
+source("../figures/R/demo_figure.R")
+```
+
+## What this deck is {#intro}
+
+::: {.keylines}
+::: {.lead}
+**A template, not a presentation**
+
+Every slide demonstrates one component. Its speaker notes say what the component
+is for and when to reach for something else.
+:::
+::: {}
+**It renders offline**
+
+No webfont, no CDN, no network call at display time. Unplug the wifi and render
+it.
+:::
+::: {}
+**Two builds, and the order matters**
+
+A folder you present from, one file you carry as insurance. Render them
+backwards and the first one breaks silently.
+:::
+:::
+
+::: {.notes}
+`.keylines` is the default. Rule-separated rows, a bold label, no boxes. Same
+information as a card row at a fraction of the chrome.
+
+Reach for it whenever the content is a short list of points that are not
+parallel objects. Most slides are this.
+:::
+
+## &nbsp; {#study1 .divider-slide background-color="#10243A"}
+
+::: {.divider}
+::: {.num}
+Part one
+:::
+::: {.big}
+A divider carries content
+:::
+::: {.sub}
+A slide holding one word reads as a blank slide, and the room registers it as a
+mistake rather than as a transition
+:::
+:::
+
+::: {.notes}
+A full-bleed divider is the cheapest way to give a deck structure the audience
+can feel. Use one for each real section and nowhere else.
+
+⚠️ A divider holding ONE WORD reads as a blank slide. Give it a sentence. The
+`.sub` block is what turns a pause into a signpost.
+
+Dividers and photo slides bleed past the canvas by design, so
+`tools/check_fit.py` excludes them from the overflow report.
+:::
+
+## Two things that are genuinely parallel {#cards-demo}
+
+::: {.cards .two}
+::: {.card}
+**Cards**
+
+Two or three objects of EQUAL WEIGHT, each one a thing of the same kind.
+
+Three is the maximum that stays readable from the back of a room.
+:::
+::: {.card .amber}
+**Not cards**
+
+A list, a contrast, or one important sentence. Each of those has its own
+component and putting it in a box costs you the emphasis.
+:::
+:::
+
+::: {.notes}
+`.cards` is the component people overuse. It is right when the items really are
+parallel objects, and wrong the rest of the time.
+
+The `.amber` class puts the secondary colour on a card's top border. Use it on
+at most one card in a row, for the one you want read second.
+:::
+
+## A binary, with no boxes around it {#versus-demo}
+
+::: {.versus}
+::: {}
+**What a versus is for**
+
+A genuine two-sided contrast. One hairline down the middle does the work that
+two boxes were doing, and it does it without spending any emphasis.
+
+The left side takes the primary colour on its label, the right side takes the
+secondary. That pairing is what tells the room these are two halves of one
+thing rather than two separate points.
+:::
+::: {}
+**When not to use it**
+
+When the two sides are not actually opposed. A versus makes a claim about the
+content, and if the content does not support the claim the slide reads as
+forced.
+
+Add `.lopsided` when one side carries much more text than the other, and
+measure the result rather than guessing the ratio.
+:::
+:::
+
+::: {.notes}
+`.versus` beats two cards for any real binary. Fewer lines on the screen, and
+the hairline reads as a comparison in a way two boxes do not.
+:::
+
+## Click either card to open it {#expand-demo .card-expand}
+
+::: {.cards .two .expandable}
+::: {.card}
+**Click handlers**
+
+::: {.card-summary}
+Open in any order · close again · needs a mouse or keyboard
+:::
+
+::: {.card-detail}
+- **Any order, any number of times.** A fragment sequence is linear and
+  one-directional. This is not.
+- **It closes again**, so the original contrast is back for the next slide.
+- ⚠️ **It cannot fire from a presentation clicker**, which drives reveal's next
+  and prev and nothing else.
+:::
+:::
+::: {.card .amber}
+**Fragments**
+
+::: {.card-summary}
+Linear · driven by the clicker · cannot close
+:::
+
+::: {.card-detail}
+- **They fire from the podium clicker**, which is the whole reason to use one.
+- **They are linear.** Step one, step two, step three, forwards only.
+- Anything that must happen while your hands are not on the laptop has to be a
+  fragment.
+:::
+:::
+:::
+
+::: {.notes}
+This slide demonstrates `includes/card-expand.html`. Put `.card-expand` on the
+slide and `.cards.expandable` on the row.
+
+⚠️ The trade is the whole lesson. A click handler is flexible and needs a
+mouse. A fragment fires from the clicker and cannot go backwards. Choose by
+where your hands will be.
+
+⚠️ `tools/check_fit.py` measures the OPEN states of this row as well as the
+closed one, because a click can push content off a slide that measured clean.
+:::
+
+## One press moves the light {#swap-demo .swap}
+
+::: {.versus}
+::: {.bg-left}
+**Lit on arrival**
+
+This column is at full strength when the slide appears. It is the premise, the
+thing you say first.
+:::
+::: {.bg-right .fragment}
+**Lit on one press**
+
+This column starts translucent and lights when you press the clicker once. It is
+the turn, the thing the slide exists to say.
+:::
+:::
+
+::: {.notes}
+This demonstrates `includes/spotlight-swap.html`, and it is a fragment rather
+than a click target so it fires from the podium clicker.
+
+⚠️ THE TRAP WORTH CARRYING AWAY. This is JavaScript and not CSS `:has()`.
+A `:has(.fragment.visible)` rule against a class reveal adds at runtime fires on
+BACKWARD arrival and not on forward clicks, and forward is the direction you
+present in. Read reveal's own state from its fragment events. Do not count
+clicks.
+:::
+
+## &nbsp; {#study2 .divider-slide background-color="#1F4E79"}
+
+::: {.divider}
+::: {.num}
+Part two
+:::
+::: {.big}
+Numbers, and where they come from
+:::
+::: {.sub}
+The figure below reads a .csv. Nothing on this slide was typed by a human
+:::
+:::
+
+::: {.notes}
+A second divider, in the primary colour rather than the dark one, so the two
+sections are distinguishable at a glance in the slide overview (`Esc`).
+:::
+
+## The treatment group pulled ahead by wave three {#figure-demo}
+
+```{r}
+demo_figure()
+```
+
+::: {.notes}
+⚠️ THE NUMBERS ARE INVENTED. `figures/data/demo_results.csv` is fabricated.
+
+THE PATTERN IS THE POINT. The slide calls a function. The function reads a
+`.csv`. Some analysis script wrote the `.csv`. Nothing in the chain holds a
+number a person typed, so a rerun that moves a coefficient moves this slide too.
+
+⚠️ THE SLIDE TITLE IS THE FINDING, not the variable name. "The treatment group
+pulled ahead by wave three" beats "Results" every time. The room reads the title
+whether or not it reads the chart.
+
+⚠️ A PLOTLY FIGURE IS THE PART MOST LIKELY TO BREAK ON SOMEONE ELSE'S MACHINE,
+and it breaks by drawing nothing rather than by erroring. That is what
+`maxScale: 1.0` in _quarto.yml protects against, and it is why
+`tools/build_static_deck.py` exists.
+:::
+
+## One sentence that deserves the slide {#statement-demo}
+
+::: {.statement .big-statement}
+The component is chosen by what the content *is*, not by what the last slide
+used.
+:::
+
+::: {.notes}
+`.statement` is the rarest component and the most effective. Use it two or three
+times in a deck, for the sentences you want the room to still have in mind at
+the end.
+
+Put nothing else on the slide. The silence around it is the whole device, and
+anything else on the slide spends it.
+
+`em` inside a statement takes the secondary colour and comes out bold rather
+than italic, so one word can carry the stress.
+:::
+
+## Before you present {#checklist}
+
+::: {.keylines .tight}
+::: {.lead}
+**Render both builds, in order**
+
+The usb profile first, then the default. Backwards and the presenting deck
+silently loses its whole theme.
+:::
+::: {}
+**Run the checks**
+
+`--fences` first, it is cheap. Then the fit check and the blank-slide check. An
+unclosed `:::` once nested 44 of 54 slides and the fit check still said CLEAN.
+:::
+::: {}
+**Then look at it**
+
+Page through every slide. A screenshot beats a number whenever they disagree.
+:::
+:::
+
+::: {.notes}
+`.tight` on a layout block removes its minimum height, so it shares a slide
+instead of filling one. Use it whenever a slide has a title AND a block.
+:::
+
+## &nbsp; {#thanks .divider-slide background-color="#10243A"}
+
+::: {.divider}
+::: {.big}
+Thank you
+:::
+::: {.sub}
+Questions
+:::
+:::
+
+::: {.notes}
+Everything after this slide is appendix. Those slides do not count toward the
+progress bar and the audience never sees them unless you go there.
+
+Press `m` for a searchable menu, or type a slide number and press Enter.
+:::
+
+{{< include appendix.qmd >}}
