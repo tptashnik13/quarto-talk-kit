@@ -50,6 +50,32 @@ that can read and edit files in a folder. Cursor, Codex CLI and similar tools wo
 way. A plain chat window without file access will not, because the agent has to read the theme
 and run the checks.
 
+### If you have never used a coding agent
+
+Skip this if you have. Otherwise the setup is about five minutes, and you do not need to know
+any of the tools this repo uses.
+
+**1. It needs a paid Claude plan.** Pro, Max, Team or Enterprise. The free claude.ai tier does
+not include Claude Code.
+
+**2. Install it.** Open Terminal on macOS or Linux and paste:
+
+```
+curl -fsSL https://claude.ai/install.sh | bash
+```
+
+On Windows, open PowerShell and paste `irm https://claude.ai/install.ps1 | iex`.
+
+**If you would rather not touch a terminal at all**, there is a
+[desktop app](https://code.claude.com/docs/en/desktop-quickstart) that does the same thing in
+a window. And if you have never used a terminal before, Anthropic has a
+[guide for that](https://code.claude.com/docs/en/terminal-guide).
+
+**3. Open a terminal in the folder you downloaded below** and type `claude`. It logs you in
+through your browser the first time. `claude --version` confirms it installed.
+
+**4. Paste the prompt in step two.** That is the whole setup.
+
 ### Step one, get the repo onto your machine
 
 ```
