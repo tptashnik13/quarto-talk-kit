@@ -81,7 +81,7 @@ Reach for it whenever the content is a short list of points that are not
 parallel objects. Most slides are this.
 :::
 
-## &nbsp; {#study1 .divider-slide background-color="#10243A"}
+## &nbsp; {#study1 .divider-slide background-color="#04351B"}
 
 ::: {.divider}
 ::: {.num}
@@ -237,7 +237,7 @@ present in. Read reveal's own state from its fragment events. Do not count
 clicks.
 :::
 
-## &nbsp; {#study2 .divider-slide background-color="#1F4E79"}
+## &nbsp; {#study2 .divider-slide background-color="#1B5834"}
 
 ::: {.divider}
 ::: {.num}
@@ -325,7 +325,7 @@ Page through every slide. A screenshot beats a number whenever they disagree.
 instead of filling one. Use it whenever a slide has a title AND a block.
 :::
 
-## &nbsp; {#thanks .divider-slide background-color="#10243A"}
+## &nbsp; {#thanks .divider-slide background-color="#04351B"}
 
 ::: {.divider}
 ::: {.big}

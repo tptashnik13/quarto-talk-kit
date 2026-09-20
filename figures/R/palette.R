@@ -15,23 +15,24 @@
 # emphasis left to spend.
 
 PAL <- list(
-  primary   = "#1F4E79",  # Primary accent. The favorable direction in a chart.
-  deep      = "#10243A",  # Dark grounds and headings.
-  gold      = "#E0A106",  # Emphasis. The unfavorable direction in a chart.
-  gold_dark = "#B87F05",  # Gold darkened for strokes on white.
+  primary   = "#1B5834",  # Primary accent. The favorable direction in a chart.
+  deep      = "#04351B",  # Dark grounds and headings.
+  gold      = "#FAB716",  # Emphasis. The unfavorable direction in a chart.
+  gold_dark = "#C4900E",  # Gold darkened for strokes on white.
   ink       = "#262626",
   grey      = "#C3CCCE",
-  tint      = "#EAF0F6",
+  tint      = "#EBF3EE",
   # Diverging ramp, gold (unfavorable) through neutral to primary (favorable).
-  ramp_bad  = "#E0A106",
-  ramp_bad2 = "#F6E0AE",
-  ramp_mid  = "#F2F4F6",
-  ramp_good2= "#AEC2D6",
-  ramp_good = "#1F4E79"
+  ramp_bad  = "#FAB716",
+  ramp_bad2 = "#F7E3B2",
+  ramp_mid  = "#F2F5F3",
+  ramp_good2= "#AFCCBB",
+  ramp_good = "#1B5834"
 )
 
 # Short names used by the figure scripts.
-TEAL  <- PAL$primary
+PRIMARY <- PAL$primary
+TEAL  <- PAL$primary   # kept as an alias so older figure scripts keep working
 AMBER <- PAL$gold
 DEEP  <- PAL$deep
 GREY  <- PAL$grey
